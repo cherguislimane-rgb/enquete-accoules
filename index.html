@@ -115,6 +115,7 @@ td.retrait{padding-left:2rem}
 /* manuel et aides */
 .lienfiche{border-color:var(--mer);color:var(--mer);font-size:.9rem;padding:.2rem .6rem;margin:.15rem .2rem .15rem 0}
 .lienfiche:hover{background:#E3F1F4}
+.lienfiche[aria-current=true]{background:var(--soleil-pale);border-color:var(--encre);color:var(--encre);font-weight:700}
 .aide{font-size:.95rem;margin:.4rem 0 .8rem}
 .explication{grid-column:1/-1;font-size:.92rem;background:var(--corail-pale);color:#7a2114;padding:.4rem .6rem;border-radius:6px}
 .fiche{scroll-margin-top:7rem}
@@ -378,6 +379,9 @@ const lienFiches = ns => ns.map(n => `<button class="lienfiche" data-fiche="${n}
 function ouvrirFiche(n){ vueDossier = 'manuel'; ficheOuverte = Number(n); dossier();
   $('main').dataset.vue = 'dossier'; $$('.bascule button').forEach(x => x.setAttribute('aria-pressed', x.dataset.vue === 'dossier'));
   const f = $('#fiche' + n); if(f) f.scrollIntoView({block:'start'}); }
+function ouvrirPiece(p){ vueDossier = 'pieces'; pieceOuverte = p; dossier();
+  $('main').dataset.vue = 'dossier'; $$('.bascule button').forEach(x => x.setAttribute('aria-pressed', x.dataset.vue === 'dossier'));
+  $('#dossier').scrollTop = 0; $$('[data-piece]').forEach(b => b.setAttribute('aria-current', b.dataset.piece === p)); }
 const ONGLETS = [['note','Note du cabinet'],['manuel','Manuel de l\'auditeur'],['pieces','Pièces'],['journal','Journal'],['gl','Grand livre'],['balance','Balance'],['bilan','Bilan'],['cr','Compte de résultat'],['plan','Plan de comptes']];
 function dossier(){
   const el = $('#dossier'); const haut = el.scrollTop;
@@ -536,6 +540,7 @@ function mission(){
   if(dernierRetour) $('#retour').innerHTML = `<div class="retour ${dernierRetour[0]}">${dernierRetour[1]}</div>`;
   ({a1:acte1, a2:acte2, a3:acte3, carnet:carnet})[vueMission]($('#corps'));
   $$('[data-fiche]', el).forEach(b => b.onclick = () => ouvrirFiche(b.dataset.fiche));
+  $$('[data-piece]', el).forEach(b => b.onclick = () => ouvrirPiece(b.dataset.piece));
   el.scrollTop = haut; neuf = null;
 }
 function dire(type, html){ dernierRetour = [type, html]; }
@@ -543,8 +548,8 @@ function dire(type, html){ dernierRetour = [type, html]; }
 /* acte 1 */
 const FICHES_MISSION = {m1:[1], m2:[2], m3:[3], m4:[4,5]};
 const MISSIONS = {
-  m1:{titre:'Mission 1. Le tri des pièces', consigne:'Ouvrez chaque pièce dans le dossier. <b>Doit-elle</b> être enregistrée dans le journal ? Une pièce ne s\'enregistre que si elle constate un flux : un bien livré, un service rendu, de l\'argent qui bouge. <b>Attention :</b> ne regardez pas dans le journal de la gérante pour répondre. C\'est justement lui que vous allez contrôler, et il contient peut-être des erreurs. Raisonnez à partir de la pièce seule.',
-      items:() => D.m1.map(p => ['m1_' + p, p + ', ' + D.pieces.find(x => x.id === p).kind.toLowerCase(), D.m1opts])},
+  m1:{titre:'Mission 1. Le tri des pièces', consigne:'Cliquez sur chaque pièce pour l\'ouvrir dans le dossier, et lisez-la en entier : son titre, ses dates, ses mentions. <b>Doit-elle</b> être enregistrée dans le journal ? Une pièce ne s\'enregistre que si elle constate un flux : un bien livré, un service rendu, de l\'argent qui bouge. <b>Attention :</b> ne regardez pas dans le journal de la gérante pour répondre. C\'est justement lui que vous allez contrôler, et il contient peut-être des erreurs. Raisonnez à partir de la pièce seule.',
+      items:() => D.m1.map(p => ['m1_' + p, 'Pièce ' + p, D.m1opts, p])},   /* 4e élément : la pièce à ouvrir, sans dire de quel document il s'agit */
   m2:{titre:'Mission 2. L\'armoire à comptes', consigne:'Rangez chaque compte de la savonnerie : actif (ce que l\'entreprise possède), passif (d\'où viennent ses ressources, ce qu\'elle doit), charge (ce qu\'elle consomme) ou produit (ce qu\'elle gagne).',
       items:() => D.m2.map(c => ['m2_' + c, c + ' ' + nomCompte[c], D.m2opts])},
   m3:{titre:'Mission 3. Suivre une pièce à la trace', consigne:'Suivez le loyer de l\'atelier (pièce P03) tout au long de la chaîne, puis remontez du bilan vers une pièce.', items:() => D.m3, col:true},
@@ -563,7 +568,7 @@ function acte1(el){
       <p class="aide">À lire avant de répondre : ${lienFiches(FICHES_MISSION[m])}</p>` +
       (e.essais && !e.fini ? `<div class="retour info" style="font-weight:400">Lisez l'explication sous chaque réponse fausse, corrigez, puis validez de nouveau.</div>` : '') +
       items.map(it => { const v = (e.vals || {})[it[0]] || ''; const etat = e.essais && v ? (H('q|' + it[0] + '|' + v) === D.answers[it[0]] ? 'juste' : 'faux') : '';
-        return `<div class="ligneq ${M.col ? 'col' : ''} ${etat}"><span>${esc(it[1])}</span><select data-q="${it[0]}" ${e.fini ? 'disabled' : ''} aria-label="${esc(it[1])}"><option value="">Choisir…</option>${it[2].map(o => `<option ${o === v ? 'selected' : ''}>${esc(o)}</option>`).join('')}</select>${etat === 'faux' && D.expl[it[0]] ? `<div class="explication">${esc(clair(D.expl[it[0]]))}</div>` : ''}</div>`; }).join('') +
+        return `<div class="ligneq ${M.col ? 'col' : ''} ${etat}"><span>${it[3] ? `<button class="lienfiche" data-piece="${it[3]}" aria-current="${pieceOuverte === it[3] && vueDossier === 'pieces'}">Ouvrir la pièce ${it[3]}</button>` : esc(it[1])}</span><select data-q="${it[0]}" ${e.fini ? 'disabled' : ''} aria-label="${esc(it[1])}"><option value="">Choisir…</option>${it[2].map(o => `<option ${o === v ? 'selected' : ''}>${esc(o)}</option>`).join('')}</select>${etat === 'faux' && D.expl[it[0]] ? `<div class="explication">${esc(clair(D.expl[it[0]]))}</div>` : ''}</div>`; }).join('') +
       (e.fini ? '' : `<div class="actions"><button class="principal" data-valider="${m}">Valider la mission</button></div>`) + '</div></details>';
   }
   if(acte1Fini()) h += `<div class="encart fait"><b>Vous êtes habilités.</b> L'acte 2 est ouvert : l'enquête commence.</div>`;
