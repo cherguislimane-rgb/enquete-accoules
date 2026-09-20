@@ -291,7 +291,10 @@ $('#btnConcept').onclick = () => volet(false);
 window.addEventListener('beforeunload', e => { if(S && aSauver && !S.a3.clos){ e.preventDefault(); e.returnValue = ''; } });
 
 /* ---------- en-tête ---------- */
-function entete(){ $('#hEquipe').textContent = S.team; $('#hAno').textContent = nbTrouvees() + ' / ' + V().sabs.length; $('#hScore').textContent = S.score; }
+/* maximums : 1 pt par réponse à l'acte 1 ; 10 pts par constat + 2 chiffrages à 3 pts ; 5 pts par montant et 2 pts par question à l'acte 3 */
+const maxActe1 = () => D.m1.length + D.m2.length + D.m3.length + D.m4.length, maxActe2 = () => V().sabs.length * 16, maxActe3 = () => D.final.length * 5 + D.qcm.length * 2;
+const scoreMax = () => maxActe1() + maxActe2() + maxActe3();
+function entete(){ $('#hEquipe').textContent = S.team; $('#hAno').textContent = nbTrouvees() + ' / ' + V().sabs.length; $('#hScore').textContent = S.score + ' / ' + scoreMax(); }
 /* compteur interne, non affiché : il ne sert qu'à horodater le déroulement dans le carnet de bord */
 setInterval(() => { if(S && !document.hidden && !S.a3.clos){ S.t++; if(S.t % 15 === 0) garder(); } }, 1000);
 $$('.bascule button').forEach(b => b.onclick = () => { $('main').dataset.vue = b.dataset.vue; $$('.bascule button').forEach(x => x.setAttribute('aria-pressed', x === b)); });
@@ -495,6 +498,7 @@ function acte1(el){
     <li>Chaque bonne réponse rapporte <b>1 point</b>, mais seulement la première fois que vous validez une mission.</li>
     <li>Ensuite, vous corrigez jusqu'à tout avoir juste, sans gagner ni perdre de points.</li>
     <li>Vérifiez donc toutes vos réponses dans le dossier avant de cliquer sur « Valider la mission ».</li>
+    <li>Maximum de cette étape : <b>${maxActe1()} points</b>, sur ${scoreMax()} pour tout le jeu.</li>
   </ul></div>`;
   for(const m in MISSIONS){ const M = MISSIONS[m], e = S.a1[m] || {vals:{}}; const items = M.items();
     h += `<details ${e.fini ? '' : 'open'} data-m="${m}"><summary><span>${M.titre}</span><span>${e.fini ? 'Validée, ' + e.pts + ' / ' + items.length : e.essais ? 'À corriger' : 'À faire'}</span></summary><div><p>${M.consigne}</p>
@@ -527,6 +531,7 @@ function acte2(el){
     <li>Une accusation à tort coûte <b>3 points</b>. Si vous visez la bonne écriture mais pas la bonne erreur : <b>1 point</b> perdu.</li>
     <li>Chiffrer l'effet d'une anomalie démasquée : <b>3 points</b> au premier essai, <b>1 point</b> ensuite.</li>
     <li>Demander une piste coûte <b>4 points</b>, puis <b>6 points</b> pour une seconde piste sur la même anomalie.</li>
+    <li>Maximum de cette étape : <b>${maxActe2()} points</b>, sur ${scoreMax()} pour tout le jeu.</li>
   </ul></div>`;
   const sidPiste = D.ordre.find(s => V().sabs.includes(s) && !S.found[s] && (S.hints[s] || 0) < 2), coutPiste = sidPiste ? ((S.hints[sidPiste] || 0) ? 6 : 4) : 0;
   h += `<div class="encart"><h3 style="margin-top:0">Par où commencer ?</h3>
@@ -587,6 +592,7 @@ function acte3(el){
     <li>Chaque montant du rapport : <b>5 points</b> au premier essai, <b>3 points</b> au deuxième, <b>1 point</b> ensuite. Un montant refusé ne fait pas perdre de points.</li>
     <li>Chaque question de synthèse : <b>2 points</b> au premier essai, <b>0</b> ensuite.</li>
     <li>L'avis pour la banque ne rapporte pas de points, mais il est obligatoire pour clore le dossier.</li>
+    <li>Maximum de cette étape : <b>${maxActe3()} points</b>, sur ${scoreMax()} pour tout le jeu.</li>
   </ul></div>
   <div class="encart"><h3 style="margin-top:0">Comment retrouver un montant juste ?</h3>
     <p>Partez du montant affiché dans les comptes de la gérante, puis retirez l'effet de chaque anomalie qui touche ce poste : montant juste = montant affiché − effet. Vos chiffrages de l'acte 2 vous donnent déjà les effets sur le résultat et sur le total de l'actif.</p>
@@ -599,7 +605,7 @@ function acte3(el){
   h += `<h3>Votre avis pour la Banque Phocéenne</h3><p>En quelques lignes : la banque pouvait-elle se fier aux comptes présentés par la gérante ? Que montrent les vrais comptes ? Que conseillez-vous à la savonnerie pour la suite ?</p>
     <textarea id="avis" ${a.clos ? 'readonly' : ''} style="min-height:9rem">${esc(a.avis)}</textarea>
     <div class="actions"><button class="principal" id="btnClore" ${a.clos ? 'disabled' : ''}>${a.clos ? 'Dossier clos' : 'Clore le dossier'}</button></div>`;
-  if(a.clos) h += `<div class="encart fait"><b>Dossier clos avec ${S.score} points.</b> Exportez votre carnet de bord depuis l'onglet « Carnet de bord » et remettez-le à votre professeur.</div>`;
+  if(a.clos) h += `<div class="encart fait"><b>Dossier clos avec ${S.score} points sur ${scoreMax()}.</b> Exportez votre carnet de bord depuis l'onglet « Carnet de bord » et remettez-le à votre professeur.</div>`;
   el.innerHTML = h;
   $('#avis').oninput = e => { a.avis = e.target.value; garder(); };
   $$('[data-fig]', el).forEach(b => b.onclick = () => { const k = b.dataset.fig, val = lireNombre($('#fig_' + k).value), lib = D.final.find(f => f[0] === k)[1];
@@ -618,7 +624,7 @@ function acte3(el){
 
 /* carnet */
 function texteCarnet(){
-  const L = ['ENQUÊTE AUX ACCOULES — CARNET DE BORD', 'Équipe : ' + S.team, 'Auditeurs : ' + (S.membres || '—'), 'Variante du dossier : ' + S.variant, 'Score : ' + S.score,
+  const L = ['ENQUÊTE AUX ACCOULES — CARNET DE BORD', 'Équipe : ' + S.team, 'Auditeurs : ' + (S.membres || '—'), 'Variante du dossier : ' + S.variant, 'Score : ' + S.score + ' / ' + scoreMax(),
     'Anomalies démasquées : ' + nbTrouvees() + ' / ' + V().sabs.length, 'Dossier clos : ' + (S.a3.clos ? 'oui' : 'non'), '', 'CONSTATS ET JUSTIFICATIONS'];
   Object.keys(S.found).forEach(s => L.push('- ' + clair(D.sab[s].titre) + ' (écriture n° ' + S.found[s].num + ')', '  Justification : ' + S.found[s].just));
   L.push('', 'AVIS POUR LA BANQUE', S.a3.avis || '—', '', 'NOTES DE L\'ÉQUIPE', S.notes || '—', '', 'DÉROULEMENT'); S.log.forEach(l => L.push(horloge(l[0]) + '  ' + l[1])); return L.join('\n');
