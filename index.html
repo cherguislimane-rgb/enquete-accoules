@@ -188,9 +188,9 @@ dialog textarea{min-height:12rem;font-size:.85rem}
       <label for="membres">Votre classe</label>
       <input type="text" id="membres" maxlength="80" autocomplete="off">
       <div id="zoneSecret" hidden>
-        <label for="motSecret">Votre mot secret</label>
+        <label for="motSecret">Votre mot de passe</label>
         <input type="text" id="motSecret" maxlength="40" autocomplete="off">
-        <p class="aide">Avec votre prénom et votre nom, il vous permettra de retrouver votre partie sur n'importe quel ordinateur. Choisissez un mot simple, notez-le, et n'utilisez surtout pas un de vos vrais mots de passe. Votre nom, votre classe et l'avancement de votre partie sont transmis à votre professeur.</p>
+        <p class="aide">Avec votre prénom et votre nom, il vous permettra de retrouver votre partie sur n'importe quel ordinateur. Inventez-en un nouveau, réservé à ce jeu, et notez-le : ne reprenez surtout pas celui de l'ENT, de votre messagerie ou d'un réseau social. Votre nom, votre classe et l'avancement de votre partie sont transmis à votre professeur.</p>
       </div>
       <div class="actions"><button class="principal" id="btnNouveau">Commencer l'enquête</button></div>
       <div id="msgAccueil" role="status"></div>
@@ -201,7 +201,7 @@ dialog textarea{min-height:12rem;font-size:.85rem}
         <p style="margin-bottom:0"><b>Retrouver ma partie en ligne</b></p>
         <label for="rNom">Votre prénom et votre nom, écrits comme la première fois</label>
         <input type="text" id="rNom" maxlength="40" autocomplete="off">
-        <label for="rSecret">Votre mot secret</label>
+        <label for="rSecret">Votre mot de passe</label>
         <input type="text" id="rSecret" maxlength="40" autocomplete="off">
         <div class="actions"><button class="principal" id="btnEnLigne">Retrouver ma partie</button></div>
       </div>
@@ -271,7 +271,7 @@ const garder = () => coffre.ecrire(S.team, emballer());
 function majSauver(){ const b = $('#btnSauver'); b.classList.toggle('alerte', aSauver); b.textContent = aSauver ? 'Sauvegarder la partie' : 'Sauvegarde à jour';
   const l = $('#hLigne'); if(!D.cloud || !S || S.prof){ l.innerHTML = ''; return; }
   if(!S.secret){ l.innerHTML = '<button id="btnActiver">Activer la sauvegarde en ligne</button>'; $('#btnActiver').onclick = activerEnLigne; return; }
-  l.textContent = ({ok:'En ligne : partie enregistrée', reseau:'Hors ligne : sauvegardez par fichier', secret:'En ligne : nom déjà pris ou mot secret refusé', pris:'En ligne : nom déjà pris', occupe:'En ligne : nouvel essai bientôt'})[etatLigne] || (etatLigne ? 'En ligne : envoi refusé, sauvegardez par fichier' : 'En ligne : envoi en cours'); }
+  l.textContent = ({ok:'En ligne : partie enregistrée', reseau:'Hors ligne : sauvegardez par fichier', secret:'En ligne : nom déjà pris ou mot de passe refusé', pris:'En ligne : nom déjà pris', occupe:'En ligne : nouvel essai bientôt'})[etatLigne] || (etatLigne ? 'En ligne : envoi refusé, sauvegardez par fichier' : 'En ligne : envoi en cours'); }
 
 /* ---------- sauvegarde en ligne (facultative : D.cloud vide = désactivée, le jeu fonctionne avec les fichiers) ---------- */
 let dernierEnvoi = 0, envoiPrevu = null, etatLigne = '';
@@ -289,7 +289,7 @@ async function envoyer(nouveau){ if(!D.cloud || !S || !S.secret || S.prof) retur
   majSauver(); return r; }
 function prevoirEnvoi(){ if(!D.cloud || !S || !S.secret || S.prof || envoiPrevu) return;
   envoiPrevu = setTimeout(() => { envoiPrevu = null; envoyer(); }, Math.max(5000, 45000 - (Date.now() - dernierEnvoi))); }
-async function activerEnLigne(){ const s = (prompt('Choisissez votre mot secret (4 caractères au moins). Notez-le : il servira à retrouver la partie sur un autre ordinateur. N\'utilisez pas un de vos vrais mots de passe.') || '').trim();
+async function activerEnLigne(){ const s = (prompt('Choisissez votre mot de passe (4 caractères au moins). Notez-le : il servira à retrouver la partie sur un autre ordinateur. Inventez-en un nouveau : ne reprenez pas celui de l\'ENT ou de votre messagerie.') || '').trim();
   if(s.length < 4) return; S.secret = s; garder(); etatLigne = ''; majSauver(); const r = await envoyer(true);
   if(r && !r.ok && r.error === 'pris'){ delete S.secret; garder(); etatLigne = ''; majSauver(); alert('Ce nom est déjà utilisé en ligne par une autre partie. Continuez avec les fichiers de sauvegarde.'); } }
 document.addEventListener('visibilitychange', () => { if(document.hidden && S && aSauver) envoyer(); });
@@ -310,26 +310,26 @@ $('#btnNouveau').onclick = async () => { const n = $('#nomEquipe').value.trim();
   if(coffre.lire(n)){ $('#msgAccueil').innerHTML = '<div class="retour non">Une partie au nom de « ' + esc(n) + ' » est déjà enregistrée sur ce poste. Si c\'est la vôtre, reprenez-la ci-dessous.</div>'; return; }
   const e = nouvellePartie(n, $('#membres').value.trim(), false);
   if(D.cloud){ const secret = $('#motSecret').value.trim();
-    if(secret.length < 4){ $('#msgAccueil').innerHTML = '<div class="retour non">Choisissez un mot secret d\'au moins 4 caractères.</div>'; return; }
+    if(secret.length < 4){ $('#msgAccueil').innerHTML = '<div class="retour non">Choisissez un mot de passe d\'au moins 4 caractères.</div>'; return; }
     e.secret = secret; $('#btnNouveau').disabled = true; $('#msgAccueil').innerHTML = '<div class="retour info">Création de la partie en ligne…</div>';
     S = e; const r = await envoyer(true); S = null;
-    if(r && !r.ok && r.error === 'pris'){ /* même nom et même mot secret : c'est le même élève (réponse perdue, double clic…), on reprend sa partie */
+    if(r && !r.ok && r.error === 'pris'){ /* même nom et même mot de passe : c'est le même élève (réponse perdue, double clic…), on reprend sa partie */
       let deja = null; try { deja = await appel({action:'load', team:n, secret}); } catch(err){}
       const o = deja && deja.ok && deballer(deja.code);
       if(o){ $('#btnNouveau').disabled = false; $('#msgAccueil').innerHTML = ''; o.secret = secret; reprise(o); return; } }
     $('#btnNouveau').disabled = false; $('#msgAccueil').innerHTML = '';
-    if(r && !r.ok && r.error === 'pris'){ $('#msgAccueil').innerHTML = '<div class="retour non">Le nom « ' + esc(n) + ' » est déjà utilisé en ligne. Si c\'est bien vous, utilisez « Retrouver ma partie en ligne » ci-dessous avec votre mot secret. Si c\'est un homonyme, ajoutez votre classe après votre nom.</div>'; return; }
+    if(r && !r.ok && r.error === 'pris'){ $('#msgAccueil').innerHTML = '<div class="retour non">Le nom « ' + esc(n) + ' » est déjà utilisé en ligne. Si c\'est bien vous, utilisez « Retrouver ma partie en ligne » ci-dessous avec votre mot de passe. Si c\'est un homonyme, ajoutez votre classe après votre nom.</div>'; return; }
     const etat = etatLigne; demarrer(e); etatLigne = etat; }
   else demarrer(e);
   noter('Ouverture du dossier'); };
 function reprise(o){ demarrer(o); noter('Reprise de la partie'); aSauver = false; majSauver(); }
 $('#btnEnLigne').onclick = async () => { const n = $('#rNom').value.trim(), s = $('#rSecret').value.trim(), msg = h => $('#msgReprise').innerHTML = h;
-  if(n.length < 2 || s.length < 4){ msg('<div class="retour non">Indiquez votre prénom, votre nom et votre mot secret.</div>'); return; }
+  if(n.length < 2 || s.length < 4){ msg('<div class="retour non">Indiquez votre prénom, votre nom et votre mot de passe.</div>'); return; }
   $('#btnEnLigne').disabled = true; msg('<div class="retour info">Recherche de votre partie…</div>'); let r = null;
   try { r = await appel({action:'load', team:n, secret:s}); } catch(e){}
   $('#btnEnLigne').disabled = false;
   if(!r){ msg('<div class="retour non">Connexion impossible au service en ligne. Utilisez votre fichier de sauvegarde ou votre code de reprise ci-dessous.</div>'); return; }
-  if(!r.ok){ msg('<div class="retour non">' + (r.error === 'inconnu' ? 'Aucune partie à ce nom n\'est enregistrée en ligne. Écrivez votre prénom et votre nom exactement comme la première fois.' : r.error === 'secret' ? 'Mot secret incorrect. Si vous l\'avez oublié, demandez à votre professeur de le réinitialiser.' : 'Le service en ligne n\'a pas pu répondre. Réessayez dans un instant.') + '</div>'); return; }
+  if(!r.ok){ msg('<div class="retour non">' + (r.error === 'inconnu' ? 'Aucune partie à ce nom n\'est enregistrée en ligne. Écrivez votre prénom et votre nom exactement comme la première fois.' : r.error === 'secret' ? 'Mot de passe incorrect. Si vous l\'avez oublié, demandez à votre professeur de le réinitialiser.' : 'Le service en ligne n\'a pas pu répondre. Réessayez dans un instant.') + '</div>'); return; }
   let o = deballer(r.code); if(!o){ msg('<div class="retour non">La partie enregistrée en ligne est illisible. Utilisez votre fichier de sauvegarde.</div>'); return; }
   const ici = coffre.lire(o.team);
   if(ici && ici.t > o.t && confirm('Une partie plus avancée de « ' + o.team + ' » est enregistrée sur ce poste.\n\nOK : reprendre la partie la plus avancée (conseillé).\nAnnuler : reprendre la partie enregistrée en ligne.')) o = ici;
@@ -350,7 +350,7 @@ $('#btnConcept').onclick = () => volet(false);
     z.innerHTML = '<p style="margin-bottom:.3rem"><b>Parties enregistrées sur ce poste</b></p>' + parties.map((o, i) => `<button data-i="${i}" style="display:block;margin:.3rem 0;text-align:left">${esc(o.team)} : ${Object.keys(o.found).length} anomalie${Object.keys(o.found).length > 1 ? 's' : ''}, ${o.score} point${Math.abs(o.score) > 1 ? 's' : ''}</button>`).join('');
     $$('button', z).forEach(b => b.onclick = () => reprise(parties[b.dataset.i])); } }
 if(D.cloud){ $('#zoneSecret').hidden = false; $('#zoneEnLigne').hidden = false;
-  $('#pSauvegarde').innerHTML = '<b>Votre partie est enregistrée en ligne automatiquement.</b> Avec votre nom et votre mot secret, vous la retrouverez sur n\'importe quel ordinateur, même dans une autre salle. Par sécurité, le bouton « Sauvegarder la partie » permet aussi de garder un fichier.';
+  $('#pSauvegarde').innerHTML = '<b>Votre partie est enregistrée en ligne automatiquement.</b> Avec votre nom et votre mot de passe, vous la retrouverez sur n\'importe quel ordinateur, même dans une autre salle. Par sécurité, le bouton « Sauvegarder la partie » permet aussi de garder un fichier.';
   $('#pFichier').textContent = 'Autre solution, si le service en ligne ne répond pas : chargez votre fichier de sauvegarde ou collez votre code de reprise.'; }
 window.addEventListener('beforeunload', e => { if(S && aSauver && !S.a3.clos){ e.preventDefault(); e.returnValue = ''; } });
 
