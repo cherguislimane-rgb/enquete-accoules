@@ -169,28 +169,28 @@ dialog textarea{min-height:12rem;font-size:.85rem}
   <div class="entree">
     <div id="concept">
       <h2>Comment se déroule l'enquête</h2>
-      <p>Vous jouez en équipe, dans la peau d'auditeurs juniors. Tout le dossier comptable de la savonnerie est entre vos mains : pièces justificatives, journal, grand livre, balance, bilan et compte de résultat.</p>
+      <p>Vous jouez seul, dans la peau d'un auditeur junior. Tout le dossier comptable de la savonnerie est entre vos mains : pièces justificatives, journal, grand livre, balance, bilan et compte de résultat.</p>
       <ol class="etapes">
         <li><b>Votre premier jour au cabinet.</b> Quatre missions courtes pour prouver que vous savez lire un dossier.</li>
         <li><b>L'enquête.</b> Retrouvez les anomalies cachées dans les comptes, en croisant les documents, preuve à l'appui.</li>
         <li><b>Le rapport à la banque.</b> Rétablissez les vrais comptes de la savonnerie au 30 septembre.</li>
       </ol>
-      <p><b>Aucune connaissance n'est demandée au départ.</b> Le « Manuel de l'auditeur », toujours disponible dans le dossier, explique chaque notion avec un exemple, et chaque mission vous indique la fiche à lire avant de répondre.</p>
-      <p>Votre équipe marque des points tout au long du jeu. Au début de chaque étape, un encart jaune vous indique comment les points y sont comptés.</p>
+      <p><b>Aucune connaissance n'est demandée au départ.</b> Le « Manuel de l'auditeur », toujours disponible dans le dossier, explique chaque règle avec un exemple, et chaque mission vous indique la fiche à lire avant de répondre. Les fiches ne donnent pas les réponses : à vous d'appliquer les règles aux documents de la savonnerie.</p>
+      <p>Vous marquez des points tout au long du jeu. Au début de chaque étape, un encart jaune vous indique comment les points y sont comptés.</p>
       <p id="pSauvegarde"><b>Avant de quitter la salle</b>, cliquez sur « Sauvegarder la partie » et gardez le fichier ou le code obtenu (ENT, messagerie, clé USB) : c'est lui qui vous permettra de continuer sur n'importe quel ordinateur.</p>
       <div class="actions"><button class="principal" id="btnEntrer">Entrer au cabinet</button></div>
     </div>
     <div id="formulaire" hidden>
     <section>
       <h2>Ouvrir un nouveau dossier</h2>
-      <label for="nomEquipe">Nom de votre équipe</label>
+      <label for="nomEquipe">Votre prénom et votre nom</label>
       <input type="text" id="nomEquipe" maxlength="40" autocomplete="off">
-      <label for="membres">Prénoms des auditeurs</label>
+      <label for="membres">Votre classe</label>
       <input type="text" id="membres" maxlength="80" autocomplete="off">
       <div id="zoneSecret" hidden>
-        <label for="motSecret">Mot secret de l'équipe</label>
+        <label for="motSecret">Votre mot secret</label>
         <input type="text" id="motSecret" maxlength="40" autocomplete="off">
-        <p class="aide">Avec le nom de l'équipe, il vous permettra de retrouver votre partie sur n'importe quel ordinateur. Choisissez un mot simple, notez-le, et n'utilisez surtout pas un de vos vrais mots de passe. Le nom de l'équipe, vos prénoms et l'avancement de la partie sont transmis à votre professeur.</p>
+        <p class="aide">Avec votre prénom et votre nom, il vous permettra de retrouver votre partie sur n'importe quel ordinateur. Choisissez un mot simple, notez-le, et n'utilisez surtout pas un de vos vrais mots de passe. Votre nom, votre classe et l'avancement de votre partie sont transmis à votre professeur.</p>
       </div>
       <div class="actions"><button class="principal" id="btnNouveau">Commencer l'enquête</button></div>
       <div id="msgAccueil" role="status"></div>
@@ -199,9 +199,9 @@ dialog textarea{min-height:12rem;font-size:.85rem}
       <h2>Reprendre une partie</h2>
       <div id="zoneEnLigne" hidden>
         <p style="margin-bottom:0"><b>Retrouver ma partie en ligne</b></p>
-        <label for="rNom">Nom de votre équipe</label>
+        <label for="rNom">Votre prénom et votre nom, écrits comme la première fois</label>
         <input type="text" id="rNom" maxlength="40" autocomplete="off">
-        <label for="rSecret">Mot secret de l'équipe</label>
+        <label for="rSecret">Votre mot secret</label>
         <input type="text" id="rSecret" maxlength="40" autocomplete="off">
         <div class="actions"><button class="principal" id="btnEnLigne">Retrouver ma partie</button></div>
       </div>
@@ -224,7 +224,7 @@ dialog textarea{min-height:12rem;font-size:.85rem}
   <div>
     <header class="barre">
       <h1>Enquête aux Accoules</h1>
-      <span class="mesure">Équipe <b id="hEquipe"></b></span>
+      <span class="mesure">Auditeur <b id="hEquipe"></b></span>
       <span class="mesure">Anomalies <b id="hAno"></b></span>
       <span class="mesure">Score <b id="hScore"></b></span>
       <span class="mesure" id="hLigne" role="status"></span>
@@ -258,7 +258,7 @@ const horloge = t => [Math.floor(t/3600), Math.floor(t%3600/60), t%60].map(n => 
 /* ---------- état et sauvegarde ---------- */
 const CLE = 'accoules_v1', CLE2 = 'accoules_parties';
 let S = null, vueDossier = 'note', pieceOuverte = 'P01', filtreCompte = '', vueMission = 'a1', dernierRetour = null, neuf = null, aSauver = false;
-/* une sauvegarde par équipe sur ce poste (postes partagés entre plusieurs classes) ; l'ancienne clé unique est reprise */
+/* une sauvegarde par élève sur ce poste (postes partagés entre plusieurs classes) ; l'ancienne clé unique est reprise */
 const cleEquipe = t => String(t).trim().toLowerCase();
 const coffre = {
   tout(){ try { const o = JSON.parse(localStorage.getItem(CLE2) || '{}'), vieux = localStorage.getItem(CLE), p = vieux && deballer(vieux); if(p && !o[cleEquipe(p.team)]) o[cleEquipe(p.team)] = vieux; return o; } catch(e){ return {}; } },
@@ -271,7 +271,7 @@ const garder = () => coffre.ecrire(S.team, emballer());
 function majSauver(){ const b = $('#btnSauver'); b.classList.toggle('alerte', aSauver); b.textContent = aSauver ? 'Sauvegarder la partie' : 'Sauvegarde à jour';
   const l = $('#hLigne'); if(!D.cloud || !S || S.prof){ l.innerHTML = ''; return; }
   if(!S.secret){ l.innerHTML = '<button id="btnActiver">Activer la sauvegarde en ligne</button>'; $('#btnActiver').onclick = activerEnLigne; return; }
-  l.textContent = ({ok:'En ligne : partie enregistrée', reseau:'Hors ligne : sauvegardez par fichier', secret:'En ligne : nom d\'équipe déjà pris ou mot secret refusé', pris:'En ligne : nom d\'équipe déjà pris', occupe:'En ligne : nouvel essai bientôt'})[etatLigne] || (etatLigne ? 'En ligne : envoi refusé, sauvegardez par fichier' : 'En ligne : envoi en cours'); }
+  l.textContent = ({ok:'En ligne : partie enregistrée', reseau:'Hors ligne : sauvegardez par fichier', secret:'En ligne : nom déjà pris ou mot secret refusé', pris:'En ligne : nom déjà pris', occupe:'En ligne : nouvel essai bientôt'})[etatLigne] || (etatLigne ? 'En ligne : envoi refusé, sauvegardez par fichier' : 'En ligne : envoi en cours'); }
 
 /* ---------- sauvegarde en ligne (facultative : D.cloud vide = désactivée, le jeu fonctionne avec les fichiers) ---------- */
 let dernierEnvoi = 0, envoiPrevu = null, etatLigne = '';
@@ -289,9 +289,9 @@ async function envoyer(nouveau){ if(!D.cloud || !S || !S.secret || S.prof) retur
   majSauver(); return r; }
 function prevoirEnvoi(){ if(!D.cloud || !S || !S.secret || S.prof || envoiPrevu) return;
   envoiPrevu = setTimeout(() => { envoiPrevu = null; envoyer(); }, Math.max(5000, 45000 - (Date.now() - dernierEnvoi))); }
-async function activerEnLigne(){ const s = (prompt('Choisissez le mot secret de l\'équipe (4 caractères au moins). Notez-le : il servira à retrouver la partie sur un autre ordinateur. N\'utilisez pas un de vos vrais mots de passe.') || '').trim();
+async function activerEnLigne(){ const s = (prompt('Choisissez votre mot secret (4 caractères au moins). Notez-le : il servira à retrouver la partie sur un autre ordinateur. N\'utilisez pas un de vos vrais mots de passe.') || '').trim();
   if(s.length < 4) return; S.secret = s; garder(); etatLigne = ''; majSauver(); const r = await envoyer(true);
-  if(r && !r.ok && r.error === 'pris'){ delete S.secret; garder(); etatLigne = ''; majSauver(); alert('Ce nom d\'équipe est déjà utilisé en ligne par une autre partie. Continuez avec les fichiers de sauvegarde.'); } }
+  if(r && !r.ok && r.error === 'pris'){ delete S.secret; garder(); etatLigne = ''; majSauver(); alert('Ce nom est déjà utilisé en ligne par une autre partie. Continuez avec les fichiers de sauvegarde.'); } }
 document.addEventListener('visibilitychange', () => { if(document.hidden && S && aSauver) envoyer(); });
 function nouvellePartie(team, membres, prof){
   return {v:1, team, membres, variant: cyrb53(team.trim().toLowerCase(), D.seed) % 4, t:0, score:0, prof: !!prof,
@@ -306,37 +306,37 @@ function noter(txt, pts){ if(pts){ S.score += pts; } S.log.push([S.t, txt + (pts
 
 /* ---------- accueil ---------- */
 function demarrer(etat){ S = etat; etatLigne = ''; $('#accueil').style.display = 'none'; $('#jeu').style.display = 'grid'; vueMission = S.a3.clos ? 'carnet' : acte1Fini() ? 'a2' : 'a1'; entete(); dossier(); mission(); garder(); }
-$('#btnNouveau').onclick = async () => { const n = $('#nomEquipe').value.trim(); if(n.length < 2){ $('#msgAccueil').innerHTML = '<div class="retour non">Donnez un nom à votre équipe pour ouvrir le dossier.</div>'; return; }
-  if(coffre.lire(n)){ $('#msgAccueil').innerHTML = '<div class="retour non">Une partie de l\'équipe « ' + esc(n) + ' » est déjà enregistrée sur ce poste. Reprenez-la ci-dessous, ou choisissez un autre nom d\'équipe.</div>'; return; }
+$('#btnNouveau').onclick = async () => { const n = $('#nomEquipe').value.trim(); if(n.length < 2){ $('#msgAccueil').innerHTML = '<div class="retour non">Indiquez votre prénom et votre nom pour ouvrir le dossier.</div>'; return; }
+  if(coffre.lire(n)){ $('#msgAccueil').innerHTML = '<div class="retour non">Une partie au nom de « ' + esc(n) + ' » est déjà enregistrée sur ce poste. Si c\'est la vôtre, reprenez-la ci-dessous.</div>'; return; }
   const e = nouvellePartie(n, $('#membres').value.trim(), false);
   if(D.cloud){ const secret = $('#motSecret').value.trim();
-    if(secret.length < 4){ $('#msgAccueil').innerHTML = '<div class="retour non">Choisissez un mot secret d\'au moins 4 caractères pour votre équipe.</div>'; return; }
+    if(secret.length < 4){ $('#msgAccueil').innerHTML = '<div class="retour non">Choisissez un mot secret d\'au moins 4 caractères.</div>'; return; }
     e.secret = secret; $('#btnNouveau').disabled = true; $('#msgAccueil').innerHTML = '<div class="retour info">Création de la partie en ligne…</div>';
     S = e; const r = await envoyer(true); S = null;
-    if(r && !r.ok && r.error === 'pris'){ /* même nom et même mot secret : c'est la même équipe (réponse perdue, double clic…), on reprend sa partie */
+    if(r && !r.ok && r.error === 'pris'){ /* même nom et même mot secret : c'est le même élève (réponse perdue, double clic…), on reprend sa partie */
       let deja = null; try { deja = await appel({action:'load', team:n, secret}); } catch(err){}
       const o = deja && deja.ok && deballer(deja.code);
       if(o){ $('#btnNouveau').disabled = false; $('#msgAccueil').innerHTML = ''; o.secret = secret; reprise(o); return; } }
     $('#btnNouveau').disabled = false; $('#msgAccueil').innerHTML = '';
-    if(r && !r.ok && r.error === 'pris'){ $('#msgAccueil').innerHTML = '<div class="retour non">Le nom d\'équipe « ' + esc(n) + ' » est déjà utilisé en ligne. Si c\'est votre équipe, utilisez « Retrouver ma partie en ligne » ci-dessous. Sinon, choisissez un autre nom.</div>'; return; }
+    if(r && !r.ok && r.error === 'pris'){ $('#msgAccueil').innerHTML = '<div class="retour non">Le nom « ' + esc(n) + ' » est déjà utilisé en ligne. Si c\'est bien vous, utilisez « Retrouver ma partie en ligne » ci-dessous avec votre mot secret. Si c\'est un homonyme, ajoutez votre classe après votre nom.</div>'; return; }
     const etat = etatLigne; demarrer(e); etatLigne = etat; }
   else demarrer(e);
   noter('Ouverture du dossier'); };
 function reprise(o){ demarrer(o); noter('Reprise de la partie'); aSauver = false; majSauver(); }
 $('#btnEnLigne').onclick = async () => { const n = $('#rNom').value.trim(), s = $('#rSecret').value.trim(), msg = h => $('#msgReprise').innerHTML = h;
-  if(n.length < 2 || s.length < 4){ msg('<div class="retour non">Indiquez le nom de votre équipe et son mot secret.</div>'); return; }
+  if(n.length < 2 || s.length < 4){ msg('<div class="retour non">Indiquez votre prénom, votre nom et votre mot secret.</div>'); return; }
   $('#btnEnLigne').disabled = true; msg('<div class="retour info">Recherche de votre partie…</div>'); let r = null;
   try { r = await appel({action:'load', team:n, secret:s}); } catch(e){}
   $('#btnEnLigne').disabled = false;
   if(!r){ msg('<div class="retour non">Connexion impossible au service en ligne. Utilisez votre fichier de sauvegarde ou votre code de reprise ci-dessous.</div>'); return; }
-  if(!r.ok){ msg('<div class="retour non">' + (r.error === 'inconnu' ? 'Aucune équipe de ce nom n\'est enregistrée en ligne. Vérifiez l\'orthographe du nom.' : r.error === 'secret' ? 'Mot secret incorrect. Si vous l\'avez oublié, demandez à votre professeur de le réinitialiser.' : 'Le service en ligne n\'a pas pu répondre. Réessayez dans un instant.') + '</div>'); return; }
+  if(!r.ok){ msg('<div class="retour non">' + (r.error === 'inconnu' ? 'Aucune partie à ce nom n\'est enregistrée en ligne. Écrivez votre prénom et votre nom exactement comme la première fois.' : r.error === 'secret' ? 'Mot secret incorrect. Si vous l\'avez oublié, demandez à votre professeur de le réinitialiser.' : 'Le service en ligne n\'a pas pu répondre. Réessayez dans un instant.') + '</div>'); return; }
   let o = deballer(r.code); if(!o){ msg('<div class="retour non">La partie enregistrée en ligne est illisible. Utilisez votre fichier de sauvegarde.</div>'); return; }
   const ici = coffre.lire(o.team);
-  if(ici && ici.t > o.t && confirm('Une partie plus avancée de l\'équipe « ' + o.team + ' » est enregistrée sur ce poste.\n\nOK : reprendre la partie la plus avancée (conseillé).\nAnnuler : reprendre la partie enregistrée en ligne.')) o = ici;
+  if(ici && ici.t > o.t && confirm('Une partie plus avancée de « ' + o.team + ' » est enregistrée sur ce poste.\n\nOK : reprendre la partie la plus avancée (conseillé).\nAnnuler : reprendre la partie enregistrée en ligne.')) o = ici;
   o.secret = s; msg(''); reprise(o); };
 function reprendre(code){ if(H('p|' + code.trim()) === D.prof){ demarrer(nouvellePartie('Enseignant', '', true)); return; }
   let o = deballer(code); const ici = o && coffre.lire(o.team);
-  if(ici && ici.t > o.t && confirm('Une partie plus avancée de l\'équipe « ' + o.team + ' » est déjà enregistrée sur ce poste.\n\nOK : reprendre la partie la plus avancée (conseillé).\nAnnuler : utiliser quand même le code fourni.')) o = ici;
+  if(ici && ici.t > o.t && confirm('Une partie plus avancée de « ' + o.team + ' » est déjà enregistrée sur ce poste.\n\nOK : reprendre la partie la plus avancée (conseillé).\nAnnuler : utiliser quand même le code fourni.')) o = ici;
   if(o){ reprise(o); } else { $('#msgReprise').innerHTML = '<div class="retour non">Ce code de reprise est illisible. Vérifiez qu\'il est collé en entier.</div>'; } }
 $('#btnReprise').onclick = () => reprendre($('#codeReprise').value);
 $('#btnFichier').onclick = () => $('#fichierReprise').click();
@@ -347,10 +347,10 @@ $('#btnEntrer').onclick = () => { volet(true); $('#nomEquipe').focus(); };
 $('#btnConcept').onclick = () => volet(false);
 { const parties = Object.values(coffre.tout()).map(deballer).filter(o => o && !o.prof);
   if(parties.length){ volet(true); const z = $('#reprendreLocal'); z.hidden = false;
-    z.innerHTML = '<p style="margin-bottom:.3rem"><b>Parties enregistrées sur ce poste</b></p>' + parties.map((o, i) => `<button data-i="${i}" style="display:block;margin:.3rem 0;text-align:left">Équipe « ${esc(o.team)} » : ${Object.keys(o.found).length} anomalie${Object.keys(o.found).length > 1 ? 's' : ''}, ${o.score} point${Math.abs(o.score) > 1 ? 's' : ''}</button>`).join('');
+    z.innerHTML = '<p style="margin-bottom:.3rem"><b>Parties enregistrées sur ce poste</b></p>' + parties.map((o, i) => `<button data-i="${i}" style="display:block;margin:.3rem 0;text-align:left">${esc(o.team)} : ${Object.keys(o.found).length} anomalie${Object.keys(o.found).length > 1 ? 's' : ''}, ${o.score} point${Math.abs(o.score) > 1 ? 's' : ''}</button>`).join('');
     $$('button', z).forEach(b => b.onclick = () => reprise(parties[b.dataset.i])); } }
 if(D.cloud){ $('#zoneSecret').hidden = false; $('#zoneEnLigne').hidden = false;
-  $('#pSauvegarde').innerHTML = '<b>Votre partie est enregistrée en ligne automatiquement.</b> Avec le nom de votre équipe et son mot secret, vous la retrouverez sur n\'importe quel ordinateur, même dans une autre salle. Par sécurité, le bouton « Sauvegarder la partie » permet aussi de garder un fichier.';
+  $('#pSauvegarde').innerHTML = '<b>Votre partie est enregistrée en ligne automatiquement.</b> Avec votre nom et votre mot secret, vous la retrouverez sur n\'importe quel ordinateur, même dans une autre salle. Par sécurité, le bouton « Sauvegarder la partie » permet aussi de garder un fichier.';
   $('#pFichier').textContent = 'Autre solution, si le service en ligne ne répond pas : chargez votre fichier de sauvegarde ou collez votre code de reprise.'; }
 window.addEventListener('beforeunload', e => { if(S && aSauver && !S.a3.clos){ e.preventDefault(); e.returnValue = ''; } });
 
@@ -416,78 +416,72 @@ const NATURES_EXPL = {
 function vManuel(){
   const f = (n, corps) => `<details class="fiche" id="fiche${n}" ${ficheOuverte === n ? 'open' : ''}><summary><span>Fiche ${n}. ${FICHES[n]}</span></summary><div>${corps}</div></details>`;
   return `<h2>Manuel de l'auditeur junior</h2>
-<p>Huit fiches courtes pour apprendre ce dont vous avez besoin, au moment où vous en avez besoin. Les exemples parlent d'une autre entreprise, la boulangerie « Le Fournil du Vallon » : à vous d'appliquer les mêmes raisonnements à la savonnerie.</p>` +
+<p>Huit fiches courtes pour apprendre ce dont vous avez besoin, au moment où vous en avez besoin. Elles expliquent les règles et la méthode, avec des exemples pris dans une autre entreprise, la boulangerie « Le Fournil du Vallon ». <b>Elles ne donnent pas les réponses</b> : à vous d'appliquer le raisonnement aux documents de la savonnerie.</p>` +
 
 f(1, `<p>Une entreprise échange sans cesse avec les autres : elle achète, vend, paie, encaisse, emprunte. Chacun de ces échanges est un <b>flux</b>.</p>
-<ul><li><b>Flux réel</b> : un bien est livré ou un service est rendu (de la farine arrive, l'électricité est consommée, du pain est remis au client).</li>
-<li><b>Flux monétaire</b> : de l'argent change de mains (un virement part, des espèces entrent en caisse).</li></ul>
-<p>La <b>pièce justificative</b> est le document qui prouve un flux. La comptabilité n'enregistre que des flux prouvés.</p>
-<div class="retenir"><b>Deux règles à retenir.</b> Pas de flux, pas d'écriture. Pas de pièce, pas d'écriture.</div>
-<table><thead><tr><th>Document</th><th>Que prouve-t-il ?</th><th>Écriture ?</th></tr></thead><tbody>
-<tr><td>Facture</td><td>Un bien a été livré ou un service rendu (flux réel)</td><td>Oui, même si elle n'est pas encore payée</td></tr>
-<tr><td>Avis de virement, de prélèvement, de crédit, ticket de caisse, bordereau de versement</td><td>De l'argent a bougé (flux monétaire)</td><td>Oui</td></tr>
-<tr><td>Devis</td><td>Une simple proposition de prix</td><td>Non : rien n'est livré, rien n'est dû</td></tr>
-<tr><td>Bon de commande</td><td>Une intention d'acheter plus tard</td><td>Non : on attend la livraison et la facture</td></tr>
-<tr><td>Relevé bancaire</td><td>Le récapitulatif du mois, établi par la banque</td><td>Non : chaque mouvement a déjà sa propre pièce. Il sert à contrôler</td></tr></tbody></table>
-<div class="exemple"><b>Exemple</b>Le 2 mars, la boulangerie reçoit un devis pour un four : rien à enregistrer. Le 20 mars, le four est livré avec sa facture : une écriture. Le 30 mars, la boulangerie paie par virement : une deuxième écriture. Un seul achat, mais deux flux, donc deux écritures à deux dates différentes.</div>`) +
+<ul><li><b>Flux réel</b> : un bien est réellement livré, ou un service réellement rendu.</li>
+<li><b>Flux monétaire</b> : de l'argent change réellement de mains.</li></ul>
+<p>La <b>pièce justificative</b> est le document qui prouve un flux. La comptabilité n'enregistre que des flux prouvés, et chaque flux une seule fois.</p>
+<div class="retenir"><b>Trois règles à retenir.</b> Pas de flux, pas d'écriture. Pas de pièce, pas d'écriture. Un même flux ne s'enregistre qu'une fois, à partir de la pièce qui le prouve au moment où il se produit.</div>
+<p><b>La méthode.</b> Le titre d'un document ne suffit pas pour décider : il faut le lire en entier, dates et mentions comprises. Devant chaque pièce, posez-vous trois questions.</p>
+<ol><li>À la date du document, un bien a-t-il réellement été livré, ou un service réellement rendu ?</li>
+<li>De l'argent a-t-il réellement changé de mains ?</li>
+<li>Ce flux n'est-il pas déjà prouvé par une autre pièce du dossier ?</li></ol>
+<p>Si la réponse aux deux premières questions est non, il n'y a rien à enregistrer. Si le flux est déjà prouvé ailleurs, l'enregistrer de nouveau le compterait deux fois.</p>
+<div class="exemple"><b>Exemple</b>Le 2 mars, le meunier envoie à la boulangerie son catalogue et ses tarifs : aucun flux, rien à enregistrer. Le 20 mars, il livre 50 sacs de farine avec sa facture : flux réel, une écriture, même si rien n'est encore payé. Le 30 mars, la boulangerie paie par virement : flux monétaire, une deuxième écriture. Un seul achat, mais deux flux, donc deux écritures à deux dates différentes.</div>`) +
 
 f(2, `<p>Tous les comptes d'une entreprise se rangent dans quatre familles, qui alimentent deux documents.</p>
-<table><thead><tr><th>Famille</th><th>Ce que c'est</th><th>Exemples</th><th>Où la retrouve-t-on ?</th></tr></thead><tbody>
-<tr><td><b>Actif</b></td><td>Ce que l'entreprise possède</td><td>Matériel, véhicule, argent en banque et en caisse, sommes que les clients lui doivent</td><td>Bilan</td></tr>
-<tr><td><b>Passif</b></td><td>D'où viennent ses ressources, ce qu'elle doit</td><td>Capital apporté par les associés, emprunts, sommes dues aux fournisseurs</td><td>Bilan</td></tr>
-<tr><td><b>Charge</b></td><td>Ce qu'elle consomme pour fonctionner</td><td>Matières premières, loyer, électricité, assurance, publicité, intérêts</td><td>Compte de résultat</td></tr>
-<tr><td><b>Produit</b></td><td>Ce qu'elle gagne</td><td>Ventes</td><td>Compte de résultat</td></tr></tbody></table>
-<p>Le numéro du compte vous aide : son <b>premier chiffre</b> donne sa classe (voir l'onglet « Plan de comptes »).</p>
-<table><thead><tr><th>Classe</th><th>Contenu</th><th>Famille</th></tr></thead><tbody>
-<tr><td>1</td><td>Capitaux : capital, emprunts</td><td>Passif</td></tr>
-<tr><td>2</td><td>Immobilisations : biens durables</td><td>Actif</td></tr>
-<tr><td>4</td><td>Tiers : clients et fournisseurs</td><td><b>Attention, cela dépend</b> : le client nous doit de l'argent (actif), nous devons de l'argent au fournisseur (passif)</td></tr>
-<tr><td>5</td><td>Comptes financiers : banque, caisse</td><td>Actif</td></tr>
-<tr><td>6</td><td>Charges</td><td>Charge</td></tr>
-<tr><td>7</td><td>Produits</td><td>Produit</td></tr></tbody></table>
-<div class="exemple"><b>Exemple</b>À la boulangerie : le four est un actif, l'emprunt qui l'a financé est un passif, la farine utilisée est une charge, le pain vendu est un produit.</div>
+<table><thead><tr><th>Famille</th><th>Ce que c'est</th><th>Où la retrouve-t-on ?</th></tr></thead><tbody>
+<tr><td><b>Actif</b></td><td>Ce que l'entreprise possède, y compris ce qu'on lui doit</td><td>Bilan</td></tr>
+<tr><td><b>Passif</b></td><td>D'où viennent ses ressources : ce qu'on lui a apporté et ce qu'elle doit</td><td>Bilan</td></tr>
+<tr><td><b>Charge</b></td><td>Ce qu'elle consomme pour fonctionner</td><td>Compte de résultat</td></tr>
+<tr><td><b>Produit</b></td><td>Ce qu'elle gagne grâce à son activité</td><td>Compte de résultat</td></tr></tbody></table>
+<div class="exemple"><b>Exemple</b>À la boulangerie : le four est un actif, l'argent prêté par la banque pour l'acheter est un passif, la farine utilisée est une charge, le pain vendu est un produit.</div>
+<p><b>La méthode.</b> Pour classer un compte, posez-vous deux questions, dans l'ordre.</p>
+<ol><li>Est-ce quelque chose que l'entreprise <b>consomme</b> pour fonctionner, ou qu'elle <b>gagne</b> par son activité ? Alors c'est une charge ou un produit.</li>
+<li>Sinon : est-ce quelque chose que l'entreprise <b>possède</b> ou qu'on lui doit (actif) ? Ou bien une ressource qu'on lui a <b>apportée</b>, ou une somme qu'elle <b>doit</b> à quelqu'un (passif) ?</li></ol>
+<p>Le numéro du compte donne un indice : son premier chiffre indique sa classe (voir l'onglet « Plan de comptes »). Mais la classe ne suffit pas toujours. Dans la classe 4, celle des tiers, on trouve à la fois des actifs et des passifs : demandez-vous toujours <b>qui doit de l'argent à qui</b>.</p>
 <div class="retenir"><b>Le résultat.</b> Résultat = produits − charges. S'il est positif, c'est un bénéfice ; s'il est négatif, une perte.</div>`) +
 
 f(3, `<p>Chaque opération est enregistrée dans <b>au moins deux comptes</b> : l'un est <b>débité</b>, l'autre est <b>crédité</b>, pour le même montant. C'est la « partie double ». Dans chaque écriture, total des débits = total des crédits.</p>
-<p>Débit et crédit ne veulent pas dire « plus » et « moins » : tout dépend de la famille du compte.</p>
+<p>Débit et crédit ne veulent pas dire « plus » et « moins » : tout dépend de la famille du compte (fiche 2).</p>
 <table><thead><tr><th>Famille du compte</th><th>Il augmente…</th><th>Il diminue…</th></tr></thead><tbody>
-<tr><td>Actif (banque, caisse, clients, matériel)</td><td>au <b>débit</b></td><td>au crédit</td></tr>
+<tr><td>Actif</td><td>au <b>débit</b></td><td>au crédit</td></tr>
 <tr><td>Charge</td><td>au <b>débit</b></td><td>au crédit</td></tr>
-<tr><td>Passif (capital, emprunts, fournisseurs)</td><td>au <b>crédit</b></td><td>au débit</td></tr>
-<tr><td>Produit (ventes)</td><td>au <b>crédit</b></td><td>au débit</td></tr></tbody></table>
-<div class="retenir"><b>Le compte Banque.</b> L'argent qui entre se note au débit, l'argent qui sort au crédit. C'est l'inverse de votre relevé bancaire personnel, parce que le relevé est écrit du point de vue de la banque.</div>
-<div class="exemple"><b>Exemple 1</b>La boulangerie paie son loyer de 700 € par virement. Le loyer est une charge qui augmente : débit du compte 613 Locations, 700. L'argent sort de la banque, un actif qui diminue : crédit du compte 512 Banque, 700.</div>
-<div class="exemple"><b>Exemple 2</b>Elle livre pour 300 € de pain à un restaurant qui paiera dans 30 jours. Le restaurant lui doit 300 €, un actif qui augmente : débit du compte 411 Clients, 300. Elle a gagné une vente, un produit qui augmente : crédit du compte 701 Ventes, 300.</div>
+<tr><td>Passif</td><td>au <b>crédit</b></td><td>au débit</td></tr>
+<tr><td>Produit</td><td>au <b>crédit</b></td><td>au débit</td></tr></tbody></table>
+<div class="retenir"><b>Le compte Banque.</b> Dans la comptabilité de l'entreprise, l'argent qui entre se note au débit et l'argent qui sort au crédit. C'est l'inverse de votre relevé bancaire personnel, parce que le relevé est écrit du point de vue de la banque.</div>
+<div class="exemple"><b>Exemple 1</b>La boulangerie achète pour 500 € de farine, payée tout de suite par chèque. La farine est consommée : c'est une charge qui augmente, donc débit du compte 601 Achats de matières premières, 500. L'argent sort de la banque : crédit du compte 512 Banque, 500.</div>
+<div class="exemple"><b>Exemple 2</b>Elle livre pour 300 € de pain à un restaurant qui paiera dans 30 jours : débit du compte 411 Clients, 300, et crédit du compte 701 Ventes, 300. À vous de retrouver, avec le tableau, pourquoi chacun de ces deux comptes bouge de ce côté-là.</div>
 <p><b>Lire le journal.</b> Chaque écriture porte un numéro, une date, le repère de sa pièce (P01, P02…), puis une ligne par compte avec le montant au débit ou au crédit. Chaque ligne est ensuite recopiée dans le compte concerné du grand livre.</p>`) +
 
 f(4, `<p>Souvent, la livraison et le paiement n'ont pas lieu le même jour. Entre les deux, quelqu'un doit de l'argent à quelqu'un.</p>
-<table><thead><tr><th>Situation</th><th>Ce qui se passe</th><th>Comptes</th></tr></thead><tbody>
-<tr><td>Vente payable plus tard</td><td>Une <b>créance</b> naît : le client doit de l'argent à l'entreprise</td><td>Débit 411 Clients, crédit 701 Ventes</td></tr>
-<tr><td>Le client paie</td><td>La créance <b>s'éteint</b>. Ce n'est pas une nouvelle vente</td><td>Débit 512 Banque, crédit 411 Clients</td></tr>
-<tr><td>Achat payable plus tard</td><td>Une <b>dette</b> naît : l'entreprise doit de l'argent au fournisseur</td><td>Débit d'un compte de charge, crédit 401 Fournisseurs</td></tr>
-<tr><td>L'entreprise paie</td><td>La dette <b>s'éteint</b></td><td>Débit 401 Fournisseurs, crédit 512 Banque</td></tr>
-<tr><td>Vente payée tout de suite en espèces</td><td>Encaissement immédiat : aucune créance</td><td>Débit 530 Caisse, crédit 701 Ventes</td></tr></tbody></table>
-<div class="retenir"><b>À retenir.</b> Le jour de la facture, la banque ne bouge pas. Elle ne bouge que le jour du règlement, prouvé par une autre pièce.</div>
-<p><b>Le cas de l'emprunt.</b> Recevoir un prêt n'enrichit pas l'entreprise : l'argent devra être rendu. C'est une <b>dette</b> (compte 164, passif), jamais un produit. Chaque échéance payée à la banque contient deux parts : le <b>remboursement du capital</b>, qui fait diminuer la dette, et les <b>intérêts</b>, qui sont le prix du prêt et donc une charge (compte 661).</p>
+<ul><li>Une <b>créance</b> est une somme qu'un tiers doit à l'entreprise.</li>
+<li>Une <b>dette</b> est une somme que l'entreprise doit à un tiers.</li></ul>
+<p>Une créance ou une dette <b>naît</b> quand la livraison a lieu avant le paiement. Elle <b>s'éteint</b> le jour où le paiement a lieu.</p>
+<div class="retenir"><b>À retenir.</b> Une facture et son règlement sont deux flux distincts, prouvés par deux pièces différentes, souvent à deux dates différentes. Chacun a sa propre écriture.</div>
+<div class="exemple"><b>Exemple</b>Le 5 mars, la boulangerie livre 300 € de pain à un restaurant, payable à 30 jours : une créance de 300 € naît (débit 411 Clients, crédit 701 Ventes). Le 4 avril, le restaurant paie par virement : la créance s'éteint (débit 512 Banque, crédit 411 Clients). Ce jour-là, la boulangerie ne vend rien de plus : elle encaisse ce qu'on lui devait.</div>
+<p><b>À vous de raisonner.</b> Côté achats, le raisonnement est le même, en miroir : construisez-le. Et quand le client paie au moment même où il reçoit la marchandise, demandez-vous si quelqu'un doit encore quelque chose à quelqu'un.</p>
+<p><b>Le cas de l'emprunt.</b> Recevoir un prêt n'enrichit pas l'entreprise : l'argent devra être rendu. C'est donc une dette envers la banque, pas un gain. Chaque échéance payée à la banque contient deux parts : le <b>remboursement du capital</b>, qui fait diminuer la dette, et les <b>intérêts</b>, qui sont le prix du prêt, donc une charge.</p>
 <div class="exemple"><b>Exemple</b>La boulangerie rembourse 310 € à sa banque : 300 € de capital et 10 € d'intérêts. Débit 164 Emprunts 300 (la dette diminue), débit 661 Charges d'intérêts 10, crédit 512 Banque 310.</div>`) +
 
 f(5, `<p><b>Charge ou immobilisation ?</b> Tout dépend de la durée d'utilisation.</p>
-<ul><li>Ce qui est <b>consommé rapidement</b> est une <b>charge</b> (classe 6) : matières premières, électricité, loyer du mois, publicité.</li>
-<li>Un bien <b>durable</b>, qui servira plusieurs années, est une <b>immobilisation</b> (classe 2, actif) : véhicule, four, machine.</li></ul>
-<div class="exemple"><b>Exemple</b>La boulangerie achète un four à 4 000 € : immobilisation, il apparaît à l'actif du bilan. Elle achète 200 € de farine : charge, elle apparaît au compte de résultat. Si le four était saisi en charge par erreur, l'actif serait trop faible de 4 000 € et le résultat aussi.</div>
+<ul><li>Ce qui est <b>consommé rapidement</b> est une <b>charge</b> : elle pèse sur le résultat de la période.</li>
+<li>Un bien <b>durable</b>, qui servira plusieurs années, est une <b>immobilisation</b> : il reste dans le patrimoine de l'entreprise et figure au bilan.</li></ul>
+<div class="exemple"><b>Exemple</b>La boulangerie achète une vitrine réfrigérée à 4 000 €, qu'elle gardera dix ans : immobilisation. Elle achète 200 € de farine, utilisée dans la semaine : charge.</div>
 <p><b>Bilan ou compte de résultat ?</b></p>
-<table><thead><tr><th>Document</th><th>Ce qu'il montre</th><th>Image</th></tr></thead><tbody>
-<tr><td>Bilan</td><td>Ce que l'entreprise possède (actif) et ce qu'elle doit (passif) <b>à une date donnée</b></td><td>Une photo</td></tr>
-<tr><td>Compte de résultat</td><td>Les charges et les produits <b>de toute une période</b>, et le résultat qui en découle</td><td>Un film</td></tr></tbody></table>
+<ul><li>Le <b>bilan</b> est une <b>photo</b> de l'entreprise : ce qu'elle possède et ce qu'elle doit.</li>
+<li>Le <b>compte de résultat</b> est un <b>film</b> : il raconte comment le résultat s'est formé, charge après charge, produit après produit.</li></ul>
+<p>Demandez-vous ce qui distingue une photo d'un film : vous saurez ce que chaque document décrit.</p>
 <div class="retenir"><b>Le bilan est toujours équilibré.</b> Total de l'actif = total du passif. Le résultat de la période figure au passif : un bilan déséquilibré signale forcément une erreur.</div>`) +
 
-f(6, `<p>Un auditeur ne relit pas tout au hasard : il applique des contrôles, toujours les mêmes. Chaque contrôle qui échoue vous met sur la piste d'une anomalie.</p>
-<ol><li><b>La balance est-elle équilibrée ?</b> Le total des débits doit être égal au total des crédits. Sinon, un montant a été mal recopié entre le journal et le grand livre : comparez-les ligne à ligne.</li>
-<li><b>Le compte Banque correspond-il au relevé bancaire ?</b> Le relevé vient de la banque : il ne dépend pas de la comptabilité de l'entreprise. C'est un témoin extérieur.</li>
-<li><b>Y a-t-il un solde impossible ?</b> Une caisse ne peut pas être négative. Une dette ne peut pas être « à l'envers ». Un solde étrange cache une erreur.</li>
-<li><b>Chaque écriture a-t-elle sa pièce ?</b> Et chaque pièce n'est-elle enregistrée qu'une seule fois ? Est-ce bien une pièce qui crée un flux (fiche 1) ?</li>
-<li><b>Le montant du journal est-il celui de la pièce ?</b> Attention : une balance équilibrée ne prouve pas que les montants sont bons. Si la même erreur est faite au débit et au crédit, la balance ne voit rien.</li>
-<li><b>Le bon compte a-t-il été utilisé ?</b> Charge ou immobilisation (fiche 5) ? Dette ou produit, créance ou nouvelle vente (fiche 4) ? Bon sens du débit et du crédit (fiche 3) ?</li></ol>
+f(6, `<p>Un auditeur ne relit pas tout au hasard : il se pose des questions de contrôle, toujours les mêmes. Quand la réponse à l'une d'elles vous étonne, vous tenez une piste : à vous de remonter jusqu'à l'écriture fautive et de comprendre ce qui s'est passé.</p>
+<ol><li><b>La balance est-elle équilibrée ?</b> Le total des débits doit être égal au total des crédits. Et le journal, l'est-il, écriture par écriture ?</li>
+<li><b>Un témoin extérieur confirme-t-il les comptes ?</b> Cherchez dans le dossier un document établi par quelqu'un d'autre que l'entreprise, et comparez-le au compte qu'il permet de vérifier.</li>
+<li><b>Chaque solde a-t-il un sens ?</b> Compte par compte, demandez-vous si le montant affiché est possible dans la réalité.</li>
+<li><b>Chaque écriture a-t-elle sa pièce ?</b> Chaque pièce n'est-elle enregistrée qu'une seule fois ? S'agit-il bien d'une pièce qui prouve un flux (fiche 1) ?</li>
+<li><b>Le montant du journal est-il celui de la pièce ?</b> Comparez-les un par un.</li>
+<li><b>Le bon compte a-t-il été utilisé, dans le bon sens ?</b> Revoyez les fiches 3, 4 et 5.</li></ol>
 <div class="retenir"><b>Où l'erreur est-elle née ?</b> Si le journal est déjà faux, l'erreur est née <b>à la saisie dans le journal</b>. Si le journal est juste mais que le grand livre affiche autre chose, elle est née <b>au report dans le grand livre</b>.</div>
 <p>Notez vos vérifications dans le carnet de bord : vous saurez ce qui a déjà été contrôlé.</p>`) +
 
@@ -683,19 +677,19 @@ function acte3(el){
     if(H('q|' + q[0] + '|' + q[2][i]) === D.answers[q[0]]){ e.ok = true; e.val = i; dire('ok', 'Bonne réponse.'); noter('Synthèse : bonne réponse', e.n ? 0 : 2); } else { e.n++; dire('non', 'Ce n\'est pas cela. Repensez à la façon dont vous avez trouvé les anomalies.'); noter('Synthèse : réponse refusée'); }
     mission(); });
   $('#btnClore').onclick = () => { if(a.avis.trim().length < 80){ dire('info', 'Rédigez votre avis pour la banque (quelques lignes) avant de clore le dossier.'); return mission(); }
-    a.clos = true; dire('ok', 'Dossier clos. Bravo à toute l\'équipe.'); noter('Dossier clos'); mission(); };
+    a.clos = true; dire('ok', 'Dossier clos. Bravo pour cette enquête.'); noter('Dossier clos'); mission(); };
 }
 
 /* carnet */
 function texteCarnet(){
-  const L = ['ENQUÊTE AUX ACCOULES — CARNET DE BORD', 'Équipe : ' + S.team, 'Auditeurs : ' + (S.membres || '—'), 'Variante du dossier : ' + S.variant, 'Score : ' + S.score + ' / ' + scoreMax(),
+  const L = ['ENQUÊTE AUX ACCOULES — CARNET DE BORD', 'Auditeur : ' + S.team, 'Classe : ' + (S.membres || '—'), 'Variante du dossier : ' + S.variant, 'Score : ' + S.score + ' / ' + scoreMax(),
     'Anomalies démasquées : ' + nbTrouvees() + ' / ' + V().sabs.length, 'Dossier clos : ' + (S.a3.clos ? 'oui' : 'non'), '', 'CONSTATS ET JUSTIFICATIONS'];
   Object.keys(S.found).forEach(s => L.push('- ' + clair(D.sab[s].titre) + ' (écriture n° ' + S.found[s].num + ')', '  Justification : ' + S.found[s].just));
-  L.push('', 'AVIS POUR LA BANQUE', S.a3.avis || '—', '', 'NOTES DE L\'ÉQUIPE', S.notes || '—', '', 'DÉROULEMENT'); S.log.forEach(l => L.push(horloge(l[0]) + '  ' + l[1])); return L.join('\n');
+  L.push('', 'AVIS POUR LA BANQUE', S.a3.avis || '—', '', 'NOTES DE L\'AUDITEUR', S.notes || '—', '', 'DÉROULEMENT'); S.log.forEach(l => L.push(horloge(l[0]) + '  ' + l[1])); return L.join('\n');
 }
 function carnet(el){
   el.innerHTML = `<h2>Carnet de bord</h2><p>Notez ici vos pistes, vos doutes, ce que vous avez déjà vérifié. Ces notes sont sauvegardées avec la partie.</p>
-  <label for="notes">Notes de l'équipe</label><textarea id="notes" style="min-height:9rem">${esc(S.notes)}</textarea>
+  <label for="notes">Vos notes</label><textarea id="notes" style="min-height:9rem">${esc(S.notes)}</textarea>
   <div class="actions"><button class="principal" id="btnSauver2">Sauvegarder la partie</button><button id="btnExport">Exporter le carnet de bord</button><button id="btnImprimer">Imprimer</button></div>
   <h3>Déroulement de l'enquête</h3><div class="journalbord">${S.log.slice().reverse().map(l => `<div><span class="num">${horloge(l[0])}</span>  ${esc(l[1])}</div>`).join('') || 'Rien pour l\'instant.'}</div>`;
   $('#notes').oninput = e => { S.notes = e.target.value; garder(); if(!aSauver){ aSauver = true; majSauver(); } prevoirEnvoi(); };
