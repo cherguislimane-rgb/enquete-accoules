@@ -119,6 +119,11 @@ td.retrait{padding-left:2rem}
 .aide{font-size:.95rem;margin:.4rem 0 .8rem}
 .explication{grid-column:1/-1;font-size:.92rem;background:var(--corail-pale);color:#7a2114;padding:.4rem .6rem;border-radius:6px}
 .fiche{scroll-margin-top:7rem}
+.fiche .exemple table{margin:.5rem 0 0}
+details.reponse{background:#fff;border-style:dashed}
+details.reponse>summary{font-family:var(--texte);font-weight:400}
+details.reponse>summary::after{content:'Voir la réponse';color:var(--mer);font-weight:700;white-space:nowrap}
+details.reponse[open]>summary::after{content:'Masquer'}
 .fiche table{margin:.6rem 0;font-size:.92rem}
 .fiche ul,.fiche ol{margin:.3rem 0 .8rem;padding-left:1.3rem;max-width:68ch}
 .fiche li{margin:.2rem 0}
@@ -373,12 +378,13 @@ function sauver(){ garder(); const code = emballer(); telecharger('sauvegarde-' 
 $('#btnSauver').onclick = sauver;
 
 /* ---------- le dossier ---------- */
-const FICHES = {1:'La pièce et le flux', 2:'Actif, passif, charges, produits', 3:'Débit et crédit', 4:'Créances, dettes et emprunts', 5:'Immobilisation ou charge, bilan ou résultat', 6:'Les contrôles de l\'auditeur', 7:'Les natures d\'erreur', 8:'Chiffrer l\'effet d\'une erreur'};
+const FICHES = {1:'La pièce et le flux', 2:'Actif, passif, charges, produits', 3:'Débit, crédit et partie double', 4:'Créances, dettes et emprunts', 5:'Immobilisation ou charge, bilan ou résultat', 6:'Les contrôles de l\'auditeur', 7:'Les natures d\'erreur', 8:'Chiffrer l\'effet d\'une erreur'};
 let ficheOuverte = 1;
 const lienFiches = ns => ns.map(n => `<button class="lienfiche" data-fiche="${n}">Fiche ${n}. ${FICHES[n]}</button>`).join('');
 function ouvrirFiche(n){ vueDossier = 'manuel'; ficheOuverte = Number(n); dossier();
   $('main').dataset.vue = 'dossier'; $$('.bascule button').forEach(x => x.setAttribute('aria-pressed', x.dataset.vue === 'dossier'));
   const f = $('#fiche' + n); if(f) f.scrollIntoView({block:'start'}); }
+function ouvrirOnglet(o){ vueDossier = o; dossier(); $('main').dataset.vue = 'dossier'; $$('.bascule button').forEach(x => x.setAttribute('aria-pressed', x.dataset.vue === 'dossier')); $('#dossier').scrollTop = 0; }
 function ouvrirPiece(p){ vueDossier = 'pieces'; pieceOuverte = p; dossier();
   $('main').dataset.vue = 'dossier'; $$('.bascule button').forEach(x => x.setAttribute('aria-pressed', x.dataset.vue === 'dossier'));
   $('#dossier').scrollTop = 0; $$('[data-piece]').forEach(b => b.setAttribute('aria-current', b.dataset.piece === p)); }
@@ -447,17 +453,54 @@ f(2, `<p>Tous les comptes d'une entreprise se rangent dans quatre familles, qui 
 <p>Le numéro du compte donne un indice : son premier chiffre indique sa classe (voir l'onglet « Plan de comptes »). Mais la classe ne suffit pas toujours. Dans la classe 4, celle des tiers, on trouve à la fois des actifs et des passifs : demandez-vous toujours <b>qui doit de l'argent à qui</b>.</p>
 <div class="retenir"><b>Le résultat.</b> Résultat = produits − charges. S'il est positif, c'est un bénéfice ; s'il est négatif, une perte.</div>`) +
 
-f(3, `<p>Chaque opération est enregistrée dans <b>au moins deux comptes</b> : l'un est <b>débité</b>, l'autre est <b>crédité</b>, pour le même montant. C'est la « partie double ». Dans chaque écriture, total des débits = total des crédits.</p>
-<p>Débit et crédit ne veulent pas dire « plus » et « moins » : tout dépend de la famille du compte (fiche 2).</p>
+f(3, `<p><b>1. L'idée de départ.</b> Dans une entreprise, rien ne tombe du ciel et rien ne disparaît : chaque opération fait <b>partir</b> une valeur d'un endroit et la fait <b>arriver</b> à un autre. Quand vous payez 2 € pour une baguette, 2 € quittent votre poche et une baguette arrive dans votre sac : il y a toujours deux côtés.</p>
+<p>Le comptable note donc <b>les deux côtés</b> de chaque opération, pour le même montant. C'est ce qu'on appelle la <b>partie double</b>. Pour chaque opération, il se pose deux questions.</p>
+<div class="deuxcol"><div class="exemple"><b>D'où vient la valeur ?</b>Le compte d'où elle part est <b>crédité</b> : le montant s'écrit dans la colonne <b>Crédit</b>.</div>
+<div class="exemple"><b>Où va la valeur ?</b>Le compte où elle arrive est <b>débité</b> : le montant s'écrit dans la colonne <b>Débit</b>.</div></div>
+<div class="retenir"><b>À retenir.</b> Crédit = d'où ça vient. Débit = où ça va. Dans une écriture, le total des débits est toujours égal au total des crédits, puisque c'est la même valeur qui part et qui arrive. Oubliez le sens courant des mots : ici, « débit » ne veut pas dire « moins » et « crédit » ne veut pas dire « plus ».</div>
+
+<p><b>2. Trois exemples pas à pas</b>, à la boulangerie.</p>
+<div class="exemple"><b>Exemple A. Elle achète 500 € de farine, payés tout de suite par chèque.</b>
+D'où vient la valeur ? Du compte en banque : 500 € en sortent, donc le compte Banque est crédité. Où va-t-elle ? Dans la farine, que la boulangerie va consommer, donc le compte Achats de matières premières est débité.
+<table><thead><tr><th>Compte</th><th class="num">Débit</th><th class="num">Crédit</th></tr></thead><tbody>
+<tr><td>601 Achats de matières premières</td><td class="num">500 €</td><td></td></tr><tr><td class="retrait">512 Banque</td><td></td><td class="num">500 €</td></tr></tbody></table></div>
+<div class="exemple"><b>Exemple B. Elle vend pour 80 € de pain, payés en espèces.</b>
+D'où vient la valeur ? De son activité de vente : le compte Ventes est crédité. Où va-t-elle ? Dans le tiroir-caisse : le compte Caisse est débité.
+<table><thead><tr><th>Compte</th><th class="num">Débit</th><th class="num">Crédit</th></tr></thead><tbody>
+<tr><td>530 Caisse</td><td class="num">80 €</td><td></td></tr><tr><td class="retrait">701 Ventes de produits finis</td><td></td><td class="num">80 €</td></tr></tbody></table></div>
+<div class="exemple"><b>Exemple C. Elle livre 300 € de pain à un restaurant, qui paiera dans 30 jours.</b>
+D'où vient la valeur ? Toujours de l'activité de vente : le compte Ventes est crédité. Où va-t-elle ? Pas encore dans la banque : pour l'instant, c'est le restaurant qui doit 300 €. La valeur arrive donc dans le compte Clients, qui est débité.
+<table><thead><tr><th>Compte</th><th class="num">Débit</th><th class="num">Crédit</th></tr></thead><tbody>
+<tr><td>411 Clients</td><td class="num">300 €</td><td></td></tr><tr><td class="retrait">701 Ventes de produits finis</td><td></td><td class="num">300 €</td></tr></tbody></table></div>
+
+<p><b>3. Lire une écriture dans le journal.</b> Le journal de la savonnerie se présente comme l'extrait ci-dessous, tiré du journal de la boulangerie.</p>
+<table><thead><tr><th>N°</th><th>Date</th><th>Pièce</th><th>Compte</th><th class="num">Débit</th><th class="num">Crédit</th></tr></thead><tbody>
+<tr class="debut"><td><b>7</b></td><td>12/03</td><td>B07</td><td>616 Primes d'assurance</td><td class="num">90 €</td><td></td></tr>
+<tr><td></td><td></td><td></td><td class="retrait">512 Banque</td><td></td><td class="num">90 €</td></tr>
+<tr><td></td><td></td><td></td><td colspan="3"><i>Assurance du fournil, mars</i></td></tr></tbody></table>
+<ul><li><b>N°</b> : le numéro de l'écriture (ici, l'écriture n° 7). Une écriture occupe plusieurs lignes : une par compte.</li>
+<li><b>Pièce</b> : le repère de la pièce justificative qui prouve l'opération. Pour retrouver l'écriture d'une pièce, cherchez son repère dans cette colonne.</li>
+<li><b>Compte</b> : le numéro et le nom du compte touché.</li>
+<li><b>Débit</b> et <b>Crédit</b> : le montant est écrit dans l'une des deux colonnes. Un compte est <b>débité</b> si son montant est dans la colonne Débit, <b>crédité</b> s'il est dans la colonne Crédit. Le compte crédité est légèrement décalé vers la droite.</li></ul>
+<p>Dans l'écriture n° 7 : le compte Primes d'assurance est débité de 90 € (la valeur y arrive : l'assurance est consommée), le compte Banque est crédité de 90 € (la valeur en part).</p>
+
+<p><b>4. Entraînez-vous</b> avant de passer à la mission. Cherchez la réponse, puis cliquez pour vérifier. Ces exercices ne comptent pas dans le score.</p>
+<details class="reponse"><summary><span>Le boulanger prend 200 € d'espèces dans la caisse et les dépose à la banque. Quel compte est crédité ? Lequel est débité ?</span></summary><div>La valeur part de la caisse : le compte 530 Caisse est <b>crédité</b> de 200 €. Elle arrive à la banque : le compte 512 Banque est <b>débité</b> de 200 €.</div></details>
+<details class="reponse"><summary><span>La boulangerie paie 45 € d'abonnement téléphonique, prélevés sur son compte. Quel compte est crédité ? Lequel est débité ?</span></summary><div>La valeur part de la banque : le compte 512 Banque est <b>crédité</b> de 45 €. Elle arrive dans un service que la boulangerie consomme : le compte 626 Frais postaux et de télécommunications est <b>débité</b> de 45 €.</div></details>
+
+<p><b>5. Le mémo des habitués.</b> À force, les comptables retiennent ce tableau, qui dit la même chose autrement. Les familles de comptes sont expliquées dans la fiche 2.</p>
 <table><thead><tr><th>Famille du compte</th><th>Il augmente…</th><th>Il diminue…</th></tr></thead><tbody>
-<tr><td>Actif</td><td>au <b>débit</b></td><td>au crédit</td></tr>
-<tr><td>Charge</td><td>au <b>débit</b></td><td>au crédit</td></tr>
-<tr><td>Passif</td><td>au <b>crédit</b></td><td>au débit</td></tr>
-<tr><td>Produit</td><td>au <b>crédit</b></td><td>au débit</td></tr></tbody></table>
-<div class="retenir"><b>Le compte Banque.</b> Dans la comptabilité de l'entreprise, l'argent qui entre se note au débit et l'argent qui sort au crédit. C'est l'inverse de votre relevé bancaire personnel, parce que le relevé est écrit du point de vue de la banque.</div>
-<div class="exemple"><b>Exemple 1</b>La boulangerie achète pour 500 € de farine, payée tout de suite par chèque. La farine est consommée : c'est une charge qui augmente, donc débit du compte 601 Achats de matières premières, 500. L'argent sort de la banque : crédit du compte 512 Banque, 500.</div>
-<div class="exemple"><b>Exemple 2</b>Elle livre pour 300 € de pain à un restaurant qui paiera dans 30 jours : débit du compte 411 Clients, 300, et crédit du compte 701 Ventes, 300. À vous de retrouver, avec le tableau, pourquoi chacun de ces deux comptes bouge de ce côté-là.</div>
-<p><b>Lire le journal.</b> Chaque écriture porte un numéro, une date, le repère de sa pièce (P01, P02…), puis une ligne par compte avec le montant au débit ou au crédit. Chaque ligne est ensuite recopiée dans le compte concerné du grand livre.</p>`) +
+<tr><td>Actif et charge</td><td>au <b>débit</b></td><td>au crédit</td></tr>
+<tr><td>Passif et produit</td><td>au <b>crédit</b></td><td>au débit</td></tr></tbody></table>
+<p>Attention au compte Banque : dans la comptabilité de l'entreprise, l'argent qui entre est au débit et l'argent qui sort au crédit. C'est l'inverse de votre relevé bancaire personnel, parce que le relevé est écrit du point de vue de la banque.</p>
+
+<p><b>6. De la pièce au bilan : le trajet d'une opération.</b> Reprenons l'exemple A, la farine payée 500 € par chèque.</p>
+<ol><li>La <b>pièce</b> (la facture du meunier) prouve l'opération.</li>
+<li>Le comptable en tire une écriture dans le <b>journal</b>, qui range toutes les écritures dans l'ordre des dates.</li>
+<li>Chaque ligne de l'écriture est recopiée dans le <b>grand livre</b>, qui range les mêmes montants compte par compte : ici une ligne dans le compte 601 et une ligne dans le compte 512.</li>
+<li>La <b>balance</b> reprend tous les comptes du grand livre sur une seule page, avec pour chacun le total de ses débits, le total de ses crédits et son solde.</li>
+<li>Enfin, chaque compte rejoint son document de synthèse selon sa famille (fiche 2) : le compte 601, une charge, va au <b>compte de résultat</b> ; le compte 512, un actif, va au <b>bilan</b>.</li></ol>
+<p>Pour suivre une opération à la trace dans la savonnerie, faites le même trajet, document après document, en vous aidant du repère de la pièce et du numéro d'écriture.</p>`) +
 
 f(4, `<p>Souvent, la livraison et le paiement n'ont pas lieu le même jour. Entre les deux, quelqu'un doit de l'argent à quelqu'un.</p>
 <ul><li>Une <b>créance</b> est une somme qu'un tiers doit à l'entreprise.</li>
@@ -541,18 +584,19 @@ function mission(){
   ({a1:acte1, a2:acte2, a3:acte3, carnet:carnet})[vueMission]($('#corps'));
   $$('[data-fiche]', el).forEach(b => b.onclick = () => ouvrirFiche(b.dataset.fiche));
   $$('[data-piece]', el).forEach(b => b.onclick = () => ouvrirPiece(b.dataset.piece));
+  $$('[data-onglet]', el).forEach(b => b.onclick = () => ouvrirOnglet(b.dataset.onglet));
   el.scrollTop = haut; neuf = null;
 }
 function dire(type, html){ dernierRetour = [type, html]; }
 
 /* acte 1 */
-const FICHES_MISSION = {m1:[1], m2:[2], m3:[3], m4:[4,5]};
+const FICHES_MISSION = {m1:[1], m2:[2], m3:[3,2], m4:[4,5]};
 const MISSIONS = {
   m1:{titre:'Mission 1. Le tri des pièces', consigne:'Cliquez sur chaque pièce pour l\'ouvrir dans le dossier, et lisez-la en entier : son titre, ses dates, ses mentions. <b>Doit-elle</b> être enregistrée dans le journal ? Une pièce ne s\'enregistre que si elle constate un flux : un bien livré, un service rendu, de l\'argent qui bouge. <b>Attention :</b> ne regardez pas dans le journal de la gérante pour répondre. C\'est justement lui que vous allez contrôler, et il contient peut-être des erreurs. Raisonnez à partir de la pièce seule.',
       items:() => D.m1.map(p => ['m1_' + p, 'Pièce ' + p, D.m1opts, p])},   /* 4e élément : la pièce à ouvrir, sans dire de quel document il s'agit */
   m2:{titre:'Mission 2. L\'armoire à comptes', consigne:'Rangez chaque compte de la savonnerie : actif (ce que l\'entreprise possède), passif (d\'où viennent ses ressources, ce qu\'elle doit), charge (ce qu\'elle consomme) ou produit (ce qu\'elle gagne).',
       items:() => D.m2.map(c => ['m2_' + c, c + ' ' + nomCompte[c], D.m2opts])},
-  m3:{titre:'Mission 3. Suivre une pièce à la trace', consigne:'Suivez le loyer de l\'atelier (pièce P03) tout au long de la chaîne, puis remontez du bilan vers une pièce.', items:() => D.m3, col:true},
+  m3:{titre:'Mission 3. Suivre une pièce à la trace', consigne:'Vous allez suivre une opération d\'un bout à l\'autre de la chaîne comptable : le loyer de l\'atelier. Lisez d\'abord la fiche 3, faites ses deux exercices, puis avancez dans l\'ordre. <b>1.</b> Ouvrez la pièce <button class="lienfiche" data-piece="P03">P03</button> et lisez-la. <b>2.</b> Ouvrez le <button class="lienfiche" data-onglet="journal">journal</button> et cherchez l\'écriture dont la colonne « Pièce » indique P03 : elle répond aux trois premières questions. <b>3.</b> Pour les questions suivantes, refaites le trajet « de la pièce au bilan » de la fiche 3, avec les onglets du dossier sous les yeux. La <button class="lienfiche" data-onglet="note">Note du cabinet</button> résume aussi cette chaîne.', items:() => D.m3, col:true},
   m4:{titre:'Mission 4. Créances, dettes, flux et stocks', consigne:'Appuyez-vous sur les pièces citées.', items:() => D.m4, col:true},
 };
 function acte1(el){
