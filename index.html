@@ -1184,7 +1184,7 @@ function carteDeReprise(el){ const c = carteReprise, der = (c.derniere.length > 
     (S.a2.ouvert ? `<li>L'enquête : ${t ? t + ' anomalie' + (t > 1 ? 's' : '') + ' démasquée' + (t > 1 ? 's' : '') + ' sur ' + total : 'aucune anomalie démasquée pour l\'instant'}.</li>` : '') +
     `<li>Votre grade : ${grade()}. Votre total : ${pluriel(S.score, 'point')} sur ${scoreMax()}.</li>` + (der ? `<li>Votre dernière action : ${esc(der)}${/[…?!]$/.test(der) ? '' : '.'}</li>` : '') +
     `</ul><p><b>L'objectif du jour.</b> Aujourd'hui : ${esc(objectifDuJour())}.</p>`;
-  if(c.matin.length){ h += `<h3>Le point de reprise</h3><p>${['', 'Une question rapide', 'Deux questions rapides', 'Trois questions rapides'][c.matin.length]} pour vous remettre en route, sur des règles déjà travaillées. Aucun point à gagner, aucun point à perdre.</p>`;
+  if(c.matin.length){ h += `<h3>Le point de reprise</h3><p>${['', 'Une question rapide', 'Deux questions rapides', 'Trois questions rapides'][c.matin.length]} pour vous remettre en route, sur des règles déjà travaillées. Ces questions ne sont pas notées.</p>`;
     c.matin.forEach((id, i) => { if(i > fait) return; const j = jumelleDe(id), r = c.rep[id];
       h += `<div class="question ${r ? (r.ok ? 'juste' : 'revoir') : ''}" data-item="${id}"><div class="enonce"><span><b>Question ${i + 1} sur ${c.matin.length}.</b> ${esc(j.lib)}</span></div>
         <div class="saisie">${champ(j, r ? r.p : '', !!r, '')}${r ? verdict(r.ok, 0) : `<button class="principal" data-flash="${id}">Confirmer</button>`}</div>${r ? `<div class="${r.ok ? 'resolution' : 'explication'}">${explDe(id)}</div>` : ''}</div>`; }); }
@@ -1324,7 +1324,7 @@ function baremeMission(M){ const ab = M.paliers.find(p => p.code !== 'C'), c = M
   return `<div class="bareme"><b>Le barème de cette mission</b><ul>
     <li>${M.jvm ? `« Je vous montre » : <b>${pluriel(M.jvm.pts, 'point')}</b>. ` : ''}Paliers A et B : <b>${pluriel(ab.items[0].pts, 'point')}</b> par bonne réponse, au premier essai${itemsDe(M).some(it => it.type === 'ecriture') ? ' (dans une écriture : par compte juste)' : ''}.${M.film ? ' Le film du bilan : <b>1 point</b> par opération.' : ''}</li>
     <li>Palier C, « À vous seul » : <b>${pluriel(c.items[0].pts, 'point')}</b> ${c.items.every(it => it.type === 'ecriture') ? 'par compte juste' : 'par bonne réponse'}. Le mémo : <b>${pluriel(M.memo.pts, 'point')}</b>.</li>
-    <li>Après une erreur dans un palier, une question de rattrapage peut rapporter <b>1 point</b>. Rien n'est jamais retiré.</li>
+    <li>Après une erreur dans un palier, une question de rattrapage peut rapporter <b>1 point</b>.</li>
     <li>Maximum de cette mission : <b>${maxMission(M)} points</b>, sur ${scoreMax()} pour tout le jeu.</li></ul></div>`; }
 function htmlMission(M, i){ const e = etatMission(M.id); let bloque = false;
   let h = `<p class="voix">Claire Vidal : « ${esc(M.intro)} »</p>` + baremeMission(M) + `<p class="aide">À lire avant de répondre : ${lienFiches(M.fiches)}</p>`;
@@ -1335,7 +1335,7 @@ function htmlMission(M, i){ const e = etatMission(M.id); let bloque = false;
   return h; }
 function htmlPrologue(){ const Q = D.pro.items, pts = somme(Q, q => (S.pro[q.id] && S.pro[q.id].pts) || 0); let bloque = false;
   let h = `<p class="voix">Claire Vidal, cheffe de mission : « Bienvenue au cabinet. Une pièce est un document qui prouve une opération : une facture, un avis de la banque… Un auditeur commence toujours par la lire en entier. Voici la vôtre. »</p>
-    <div class="bareme"><b>Le barème de cette étape</b><ul><li>Trois questions : <b>1 point</b> par bonne réponse, au premier essai.</li><li>Une erreur ne retire rien : vous lisez l'explication, puis vous continuez.</li><li>Maximum de cette étape : <b>${maxPro()} points</b>, sur ${scoreMax()} pour tout le jeu.</li></ul></div>
+    <div class="bareme"><b>Le barème de cette étape</b><ul><li>Trois questions : <b>1 point</b> par bonne réponse, au premier essai.</li><li>Après chaque réponse, vous lisez l'explication, puis vous continuez.</li><li>Maximum de cette étape : <b>${maxPro()} points</b>, sur ${scoreMax()} pour tout le jeu.</li></ul></div>
     <div class="etape"><ol><li>Cliquez sur <button class="lienfiche" data-piece="${D.pro.piece}">Ouvrir la pièce ${D.pro.piece}</button> : elle s'affiche dans le dossier.</li><li>Lisez-la en entier. Pour revenir ici, cliquez sur « ← Revenir à la question », en haut du dossier.</li><li>Répondez, puis cliquez sur « Confirmer ». Une question à la fois.</li></ol></div>`;
   Q.forEach((q, i) => { if(bloque) return; const r = S.pro[q.id];
     h += `<div class="question ${r ? (r.ok ? 'juste' : 'revoir') : ''}" data-item="${q.id}"><div class="enonce"><span><b>Question ${i + 1} sur ${Q.length}.</b> ${esc(q.lib)}</span></div>
@@ -1449,14 +1449,14 @@ function entrainement(){ const E = D.ent, pts = somme(E, e => (S.ent[e.id] && S.
   let h = `<div class="bloc montre" data-bloc="ent"><span class="etiquette">Je vous montre</span>
     <h3>Affaire d'entraînement : les comptes de mars du Fournil, tenus par l'apprenti</h3>
     <p class="voix">Claire Vidal : « Avant la savonnerie, une enquête à blanc. En mars, l'apprenti de la boulangerie a tenu les comptes à la place du cabinet. Deux erreurs s'y cachent. Cherchez-les avec moi, étape par étape. »</p>
-    <div class="bareme"><b>Le barème de cette étape</b><ul><li>5 étapes, <b>2 points</b> chacune si votre première réponse est juste.</li><li>Les essais sont libres : une erreur ne retire rien. Après trois essais manqués, le cabinet montre la réponse (0 point pour l'étape).</li><li>Maximum de cette étape : <b>${maxEnt()} points</b>, sur ${scoreMax()} pour tout le jeu.</li></ul></div>
+    <div class="bareme"><b>Le barème de cette étape</b><ul><li>5 étapes, <b>2 points</b> chacune si votre première réponse est juste.</li><li>Les essais sont libres. Après trois essais manqués, le cabinet montre la réponse (0 point pour l'étape).</li><li>Maximum de cette étape : <b>${maxEnt()} points</b>, sur ${scoreMax()} pour tout le jeu.</li></ul></div>
     <p class="aide">Les comptes de l'apprenti sont versés au dossier : onglet « Dossier du Fournil », sous-dossier « Tenus par l'apprenti (à contrôler) ». Les pièces B01 à B07 n'ont pas changé. Les comptes tenus par le cabinet se rouvriront à la fin de cette affaire. À relire au besoin : ${lienFiches([6])}</p>`;
   E.forEach((e, i) => { if(bloque) return; const r = S.ent[e.id] || {n:0}, clos = !!r.ok, vu = clos ? (r.montre ? solEnt(e) : (r.p || {})) : null;   /* réponse montrée : on affiche celle du cabinet */
     h += `<div class="question ${clos ? (r.montre ? 'revoir' : 'juste') : ''}" data-item="${e.id}"><div class="etape"><b>Étape ${i + 1} sur ${E.length}.</b> ${esc(e.consigne)}${e.ouvre ? ` <button class="lienfiche" data-onglet="fournil" data-fv="${e.ouvre}">${esc(e.bouton)}</button>` : ''}</div>
       <div class="enonce"><span><b>${esc(e.lib)}</b></span></div>
       <div class="saisie">${e.champs.map(c => champEnt(e, c, clos ? (vu[c.k] || '') : (S.a2.br[e.id + '_' + c.k] || ''), clos)).join('')}${clos ? (r.montre ? '<span class="verdict revoir">Réponse montrée</span>' : verdict(true, r.pts)) : `<button class="principal" data-entrer="${e.id}">Confirmer</button>`}</div>` +
       (clos ? `<div class="${r.montre ? 'explication' : 'resolution'}">${r.montre ? '<b>La réponse du cabinet.</b> ' : ''}${explDe(e.id)}</div>`
-            : r.n ? `<div class="explication"><b>À revoir.</b> ${esc(clair(e.piste))} ${r.n >= 2 ? 'Encore un essai, puis le cabinet montrera la réponse.' : 'Cette étape ne rapportera plus de points, mais aucun point acquis n\'est retiré : corrigez, puis confirmez à nouveau.'}</div>` : '') + '</div>';
+            : r.n ? `<div class="explication"><b>À revoir.</b> ${esc(clair(e.piste))} ${r.n >= 2 ? 'Encore un essai, puis le cabinet montrera la réponse.' : 'Cette étape ne rapportera plus de points : corrigez, puis confirmez à nouveau.'}</div>` : '') + '</div>';
     if(!clos && !S.prof) bloque = true; });
   if(entFini()){ const F = JSON.parse(clair(D.entFin));
     h += `<div class="modele"><h4>Le constat modèle</h4><p>Voici comment un auditeur consigne l'erreur de l'écriture n° 7. Dans l'enquête, vos constats auront la même forme.</p>
@@ -1532,7 +1532,7 @@ function formConstat(guide){ const br = S.a2.br, J = V().journal, court = k => k
     : D.familles.map(f => `<details class="famille" ${f[1].includes(br.cNat) ? 'open' : ''}><summary><span>${esc(f[0])}</span><span>${pluriel(f[1].length, 'type')}</span></summary><div class="types">${f[1].map(carte).join('')}</div></details>`).join('');
   return `<div class="encart constatform" id="constat"><h3 style="margin-top:0">Déposer un constat</h3>
     <p>Un constat = une erreur que vous signalez, avec sa preuve. Remplissez les trois temps : le constat est jugé en une seule fois.</p>
-    ${guide ? '' : `<p class="droits">Droits à l'erreur : <b>${S.a2.droits} / 3</b>. ${S.a2.malus ? `Ils sont épuisés : votre prochain constat juste vaudra <b>${pluriel(Math.max(4, D.bareme.constat - S.a2.malus), 'point')}</b> au lieu de ${D.bareme.constat} (moins si vous avez demandé une aide sur cette anomalie, jamais moins de 4 points). Aucun point acquis n'est retiré.` : 'Un constat juste vaut <b>' + pluriel(D.bareme.constat, 'point') + '</b> (moins si vous avez demandé une aide sur cette anomalie), sa preuve <b>' + pluriel(D.bareme.preuve, 'point') + '</b>.' + (S.a2.droits ? '' : ' Vos droits sont épuisés : la prochaine accusation à tort diminuera de 1 point la valeur de votre prochain constat.')}</p>`}
+    ${guide ? '' : `<p class="droits">Droits à l'erreur : <b>${S.a2.droits} / 3</b>. ${S.a2.malus ? `Ils sont épuisés : votre prochain constat juste vaudra <b>${pluriel(Math.max(4, D.bareme.constat - S.a2.malus), 'point')}</b> au lieu de ${D.bareme.constat} (moins si vous avez demandé une aide sur cette anomalie, jamais moins de 4 points).` : 'Un constat juste vaut <b>' + pluriel(D.bareme.constat, 'point') + '</b> (moins si vous avez demandé une aide sur cette anomalie), sa preuve <b>' + pluriel(D.bareme.preuve, 'point') + '</b>.' + (S.a2.droits ? '' : ' Vos droits sont épuisés : la prochaine accusation à tort diminuera de 1 point la valeur de votre prochain constat.')}</p>`}
     <div class="temps"><h4>1. Quelle écriture ?</h4>
       <label for="cNum">L'écriture en cause</label><select id="cNum" data-br="a2|cNum"><option value="">Choisir…</option>${J.map(e => `<option value="${e.num}" ${String(br.cNum) === String(e.num) ? 'selected' : ''}>n° ${e.num} — ${e.date} — ${esc(e.lib)}</option>`).join('')}</select>
       <div id="cLignes">${lignesEcriture(J.find(e => String(e.num) === String(br.cNum)))}</div>
@@ -1596,7 +1596,7 @@ function defiHtml(sid){ const op = defiDe(sid), f = S.found[sid]; if(!op || !chi
   const d = f.defi || {n:0}, br = S.a2.br;
   if(d.ok) return `<div class="defi fait"><b>Défi d'expert réussi : 1 étoile.</b> L'écriture correcte :${atelier(op, null, {p:d.p, okd:true, okc:true}, '')}<div class="resolution">${explDe(op.id)}</div></div>`;
   if(d.passe) return `<p class="aide" style="margin-bottom:0">Défi d'expert : passé.</p>`;
-  return `<div class="defi ouvert"><p><b>Défi d'expert (facultatif) : 1 étoile, hors barème.</b> Avant de lire « Les dégâts », rédigez l'écriture correcte : celle que la gérante aurait dû passer à partir de la pièce. Essais libres : aucun point à gagner, aucun à perdre.</p>${atelier(op, {d:br[op.id + '_d'], c:br[op.id + '_c']}, null, 'a2|')}
+  return `<div class="defi ouvert"><p><b>Défi d'expert (facultatif) : 1 étoile, hors barème.</b> Avant de lire « Les dégâts », rédigez l'écriture correcte : celle que la gérante aurait dû passer à partir de la pièce. Essais libres, hors barème.</p>${atelier(op, {d:br[op.id + '_d'], c:br[op.id + '_c']}, null, 'a2|')}
     <div class="saisie" style="margin-top:.45rem"><button data-defi="${sid}">Vérifier l'écriture</button><button data-defipasse="${sid}">Passer le défi et lire les dégâts</button></div>
     ${d.der ? `<div class="explication">${d.der.inv ? 'Les deux comptes sont les bons, mais le sens est inversé : d\'où vient la valeur ? C\'est ce compte-là qui est crédité.' : ['d', 'c'].map(k => NOM_COTE[k] + ' : ' + (d.der['ok' + k] ? 'juste' : 'à revoir') + '.').join(' ')}</div>` : ''}</div>`; }
 /* la carte d'un constat établi : tampon, récit (sans montant d'effet), la phrase de Leïla, le geste accompli ; la preuve (second essai : 1 point, puis montrée) ; le tableau des comptes touchés
@@ -1657,7 +1657,7 @@ function releveHtml(R){ const r = etatReleve(R), cle = 'rel_' + R.id, sol = r.ok
 function aideHtml(c){ const ouverts = relevesOuverts(c), sid = cibleAide(c), niv = sid ? (S.a2.aides[sid] || 0) + 1 : 0, offert = !ouverts.length && niv === 1 && (releveReussi(c) || S.a2.suite >= 3);
   let h = '<div class="encart aidectrl"><h4 style="margin-top:0">Besoin d\'aide sur ce contrôle ?</h4>';
   ciblesCtrl(c).filter(s => S.a2.aides[s]).forEach(s => { for(let i = 1; i <= Math.min(3, S.a2.aides[s]); i++) h += `<div class="retour info" style="font-weight:400"><b>Aide de niveau ${i}${S.found[s] ? ' (anomalie démasquée depuis)' : ''}.</b> ${esc(clair(V().aides[s]['n' + i]))}</div>`; });
-  h += `<p class="aide">Trois niveaux, l'un après l'autre : 1. quoi comparer (1 point) ; 2. où regarder (2 points) ; 3. l'écriture en cause (4 points). Ces coûts s'ajoutent et réduisent seulement la valeur du constat visé, jamais sous 4 points. Aucun point acquis n'est retiré.${offert ? ' <b>Votre aide de niveau 1 est gratuite' + (releveReussi(c) ? ' : vous avez réussi un relevé de ce contrôle.' : ' : le cabinet vous l\'offre après trois constats refusés.') + '</b>' : ''}</p>
+  h += `<p class="aide">Trois niveaux, l'un après l'autre : 1. quoi comparer (1 point) ; 2. où regarder (2 points) ; 3. l'écriture en cause (4 points). Ces coûts s'ajoutent et réduisent seulement la valeur du constat visé, jamais sous 4 points.${offert ? ' <b>Votre aide de niveau 1 est gratuite' + (releveReussi(c) ? ' : vous avez réussi un relevé de ce contrôle.' : ' : le cabinet vous l\'offre après trois constats refusés.') + '</b>' : ''}</p>
     ${ouverts.length ? `<p class="aide" data-aide-fermee style="margin-bottom:0"><b>${MSG_RELEVES_AVANT(ouverts)}</b></p>` : `<div class="actions" style="margin-bottom:0"><button data-aider="${c}">J'ai besoin d'aide sur ce contrôle</button></div>`}</div>`;
   return h; }
 function carteControle(C, i){ const c = C.id, x = etatCtrl(c), R = relevesDe(c), faits = R.filter(r => etatReleve(r).ok).length, reste = resteMention(c).length;
@@ -1708,9 +1708,9 @@ function brancherGrille(el){
     const parReleve = releveReussi(c), offert = niv === 1 && (parReleve || S.a2.suite >= 3), cout = offert ? 0 : COUT_AIDE[niv];
     /* la baisse annoncée est la baisse RÉELLE : le plancher de 4 points (ou un malus déjà élevé) peut la réduire, voire l'annuler */
     const avant = valeurConstat(sid), ancien = S.a2.aides[sid]; S.a2.aides[sid] = niv; const apres = cout ? valeurConstat(sid) : avant; if(ancien) S.a2.aides[sid] = ancien; else delete S.a2.aides[sid];
-    if(cout && !window.confirm('Demander cette aide ? Elle ne retire aucun point acquis. ' + (apres < avant ? 'Le constat visé vaudra ' + pluriel(apres, 'point') + ' au lieu de ' + avant + '.' : 'Le constat visé restera à ' + pluriel(avant, 'point') + ', son minimum.'))) return;
+    if(cout && !window.confirm('Demander cette aide ? ' + (apres < avant ? 'Le constat visé vaudra ' + pluriel(apres, 'point') + ' au lieu de ' + avant + '.' : 'Le constat visé restera à ' + pluriel(avant, 'point') + ', son minimum.'))) return;
     S.a2.aides[sid] = niv; if(offert){ S.a2.gratis[sid] = true; if(!parReleve) S.a2.suite = 0; }
-    dire('info', '<b>Aide de niveau ' + niv + '.</b> ' + esc(clair(V().aides[sid]['n' + niv])) + (cout ? ' Le constat visé vaut désormais ' + pluriel(valeurConstat(sid), 'point') + ', sa preuve toujours ' + D.bareme.preuve + '. Aucun point acquis n\'est retiré.' : ' Cette aide est gratuite.'));
+    dire('info', '<b>Aide de niveau ' + niv + '.</b> ' + esc(clair(V().aides[sid]['n' + niv])) + (cout ? ' Le constat visé vaut désormais ' + pluriel(valeurConstat(sid), 'point') + ', sa preuve toujours ' + D.bareme.preuve + '.' : ' Cette aide est gratuite.'));
     noter('Aide de niveau ' + niv + ' sur le contrôle ' + n + (!cout ? ' (gratuite)' : apres < avant ? ' (le constat visé vaut ' + pluriel(apres, 'point') + ' au lieu de ' + avant + ')' : ' (le constat visé reste à ' + pluriel(avant, 'point') + ')')); aViser = `[data-ctrl="${c}"] .aidectrl`; mission(); });
 }
 
@@ -1724,7 +1724,7 @@ function acte2(el){
       (S.a2.pred ? `<p class="aide">Votre lecture des comptes de la gérante : ${S.a2.pred.sens === 'gagne' ? 'un bénéfice' : 'une perte'} de ${eur(S.a2.pred.montant)} en septembre. Vous comparerez ce chiffre au vrai résultat à la fin de l'enquête.</p>` : '') +
       `<div class="jauge" aria-hidden="true">${Array.from({length:total}, (_, i) => `<i class="${i < n ? 'on' : ''}"></i>`).join('')}</div>
       <div class="bareme"><b>Le barème de cette étape</b><ul>
-        <li><b>Tout se gagne, rien ne se retire.</b> Un constat juste : <b>${pluriel(D.bareme.constat, 'point')}</b>. Sa preuve : <b>${pluriel(D.bareme.preuve, 'point')}</b>, 1 point au second essai.</li>
+        <li>Un constat juste : <b>${pluriel(D.bareme.constat, 'point')}</b>. Sa preuve : <b>${pluriel(D.bareme.preuve, 'point')}</b>, 1 point au second essai.</li>
         <li>Vous avez <b>3 droits à l'erreur</b>. Ensuite, chaque accusation à tort réduit de 1 point la valeur de votre prochain constat (jamais moins de 4 points), et le cabinet ne commente plus vos refus. Une aide demandée réduit aussi cette valeur : son coût est annoncé avant.</li>
         <li>Chiffrage, deux phrases par anomalie : le sens, <b>2 points</b> ; le montant, <b>3 points</b>, puis 1. « Inchangé » juste : <b>5 points</b>, puis 1.</li>
         <li>Maximum de l'enquête : <b>${maxActe2() - maxEnt()} points</b> (${pluriel(V().sabs.length, 'constat')} et leurs chiffrages : ${maxActe2() - maxEnt() - somme(D.releves, R => R.pts)} ; relevés des contrôles : ${somme(D.releves, R => R.pts)}), sur ${scoreMax()} pour tout le jeu.</li>
@@ -1768,7 +1768,7 @@ function acte2(el){
     const titre = clair(D.sab[sid].titre); delete br['pr_' + sid];
     if(V().preuves.includes(H('pv|' + S.variant + '|' + sid + '|' + c.value))){ f.pr = {n:1, ok:true, pts:1}; f.piece = c.value; dire('ok', 'Preuve retenue : ' + esc(libPreuve(c.value)) + '.'); noter('Preuve retenue au second essai (' + c.value + ') : ' + titre, 1); }
     else { const bonnes = JSON.parse(clair(D.sab[sid].preuve)); f.pr = {n:2, ok:true, pts:0, montre:true}; f.piece = bonnes[0];
-      dire('info', trois('Ce n\'est pas non plus cette preuve. Le cabinet vous la montre : ' + esc(bonnes.map(libPreuve).join(' ou ')) + '.', 'Une preuve est ce qui montre, seul ou comparé à l\'écriture, que celle-ci est fausse.', 'Regardez ce que cette preuve établit, puis comparez-la à l\'écriture : vous verrez ce qui ne va pas. Aucun point n\'est retiré.'));
+      dire('info', trois('Ce n\'est pas non plus cette preuve. Le cabinet vous la montre : ' + esc(bonnes.map(libPreuve).join(' ou ')) + '.', 'Une preuve est ce qui montre, seul ou comparé à l\'écriture, que celle-ci est fausse.', 'Regardez ce que cette preuve établit, puis comparez-la à l\'écriture : vous verrez ce qui ne va pas.'));
       noter('Preuve montrée par le cabinet : ' + titre); }
     aViser = `[data-constat="${sid}"]`; mission(); });
   /* lot 6 : le chiffrage. Temps 1, le sens : 2 points au premier essai ; un second essai à 0 point ; au second refus le cabinet donne le sens. « Inchangé » juste : ligne acquise (5 points, puis 1). */
@@ -1784,8 +1784,8 @@ function acte2(el){
       else { l.spts = l.sn ? 0 : 2; dire('ok', 'Le sens est juste. Indiquez maintenant de combien, en euros et sans signe.'); noter('Chiffrage (' + L.nom + ') : sens juste : ' + titre, l.spts); } }
     else { l.sn++; l.sder = m.value;
       if(l.sn >= 2){ const s = sensJuste(sid, c); delete l.sder; l.sok = true; l.sdonne = true; l.sens = s; l.spts = 0; delete br['cs_' + id];
-        if(s === '0'){ clore(0, true); dire('info', 'Second refus : le cabinet vous montre la réponse de cette ligne. Aucun point n\'est retiré.'); }
-        else dire('info', 'Second refus : le cabinet vous donne le sens (« ' + nomSens(s) + ' »). Il vous reste à trouver le montant, qui garde toute sa valeur. Aucun point n\'est retiré.');
+        if(s === '0'){ clore(0, true); dire('info', 'Second refus : le cabinet vous montre la réponse de cette ligne.'); }
+        else dire('info', 'Second refus : le cabinet vous donne le sens (« ' + nomSens(s) + ' »). Il vous reste à trouver le montant, qui garde toute sa valeur.');
         noter('Chiffrage (' + L.nom + ') : sens donné par le cabinet : ' + titre); }
       else { dire('non', 'Ce n\'est pas le bon sens : relisez la règle sous la phrase, puis corrigez.'); noter('Chiffrage (' + L.nom + ') : sens à revoir (' + nomSens(m.value) + ') : ' + titre); } }
     finChiffrage(sid, avant); aViser = `[data-ligne="${id}"]`; mission(); });
@@ -1801,7 +1801,7 @@ function acte2(el){
     else { l.n = (l.n || 0) + 1; l.der = m;
       l.msg = ((V().double || []).includes(H('dbl|' + v + '|' + sid)) && juste(s * 2 * m)) ? 'double' : (m % 2 === 0 && juste(s * m / 2)) ? 'moitie' : [m, -m].some(x => H(autre + '|' + v + '|' + sid + '|' + x) === V().chiff[sid][LIGNES[autre].i]) ? 'autre' : ((V().diagch || {})[sid] || []).includes(H('y|' + v + '|' + sid + '|' + m)) ? 'doc' : '';
       noter('Chiffrage (' + L.nom + ') : montant refusé (' + m + ') : ' + titre);
-      if(l.n >= 3){ l.ok = true; l.montre = true; l.val = solCh(sid)[c].val; l.pts = 0; delete br['ch_' + id]; dire('info', 'Troisième refus : le cabinet vous montre la solution de cette ligne. Aucun point n\'est retiré.'); noter('Chiffrage (' + L.nom + ') : solution montrée par le cabinet : ' + titre); }
+      if(l.n >= 3){ l.ok = true; l.montre = true; l.val = solCh(sid)[c].val; l.pts = 0; delete br['ch_' + id]; dire('info', 'Troisième refus : le cabinet vous montre la solution de cette ligne.'); noter('Chiffrage (' + L.nom + ') : solution montrée par le cabinet : ' + titre); }
       else dire('non', 'Ce n\'est pas le bon montant. ' + msgChiffrage(l)); }
     finChiffrage(sid, avant); aViser = `[data-ligne="${id}"]`; mission(); });
   /* le tableau des comptes touchés : vérifié ligne à ligne, non noté, essais libres */
@@ -1862,7 +1862,7 @@ function deposer(guide){
     const cas = s2 ? 'c' : (s3 && !S.found[s3]) ? 'd' : 'e', commente = guide || S.a2.droits > 0; let cout = '';
     if(guide) cout = ' Dans cette affaire guidée, une erreur ne vous coûte rien.';
     else { S.a2.derRefus = cleDepot; S.a2.tort++; S.a2.suite++; if(S.a2.droits > 0){ S.a2.droits--; cout = S.a2.droits ? ' Il vous reste ' + S.a2.droits + ' droit' + (S.a2.droits > 1 ? 's' : '') + ' à l\'erreur sur 3.' : ' Vous venez d\'utiliser votre dernier droit à l\'erreur : désormais, chaque accusation à tort diminuera de 1 point la valeur de votre prochain constat, et le cabinet ne commentera plus vos refus.'; } else { S.a2.malus = Math.min(8, S.a2.malus + 1); cout = ' Votre prochain constat juste vaudra au plus ' + pluriel(Math.max(4, D.bareme.constat - S.a2.malus), 'point') + ' au lieu de ' + D.bareme.constat + ' (jamais moins de 4 points).'; }
-      cout += ' Aucun point acquis n\'est retiré.';
+      /* (rappel « aucun point retiré » supprimé à la demande de l'enseignant) */
       if(S.a2.suite >= 3) cout += ' Trois constats refusés d\'affilée : le cabinet vous offre une aide de niveau 1. Ouvrez un contrôle dont les relevés sont faits (ou le contrôle 6, qui n\'en a pas) et demandez-la.'; }
     const faire = guide ? 'Pour cette écriture, comparez trois montants : celui de la pièce, celui du journal, celui du grand livre. Lequel diffère des deux autres ? Choisissez le type d\'erreur qui décrit cela. Votre saisie est conservée : corrigez-la.' : '';
     if(!commente) dire('non', trois('Constat refusé.' + cout, 'Vos droits à l\'erreur sont épuisés : le cabinet ne commente plus les refus. Il ne dit plus si c\'est l\'écriture ou le type d\'erreur qui est en cause.', 'Comparez ligne à ligne la pièce et l\'écriture : comptes, sens, montant. Vous pouvez aussi reprendre un contrôle ou demander une aide. Votre saisie est conservée.'));
@@ -1954,7 +1954,7 @@ function acte3(el){
   let h = `<h2>Le rapport à la banque</h2><p>Rétablissez les vrais comptes de la savonnerie au 30 septembre, une fois toutes les erreurs corrigées. Huit montants, du plus guidé au moins guidé.</p>
   <div class="bareme"><b>Le barème de cette étape</b><ul>
     <li>Pour chaque poste, les anomalies qui le faussent : <b>1 point</b> si l'ensemble est juste au premier essai.</li>
-    <li>Le montant juste : <b>${D.bareme.poste - 1} points</b> au premier essai, <b>3</b> au deuxième, <b>1</b> au troisième ; ensuite, le cabinet montre la solution. Aucun point n'est jamais retiré.</li>
+    <li>Le montant juste : <b>${D.bareme.poste - 1} points</b> au premier essai, <b>3</b> au deuxième, <b>1</b> au troisième ; ensuite, le cabinet montre la solution.</li>
     <li>Trois missions courtes (PGI, sécurité, utilisateurs) : <b>${pluriel(D.bareme.pgi, 'point')}</b> par réponse juste, une seule tentative. L'avis pour la banque est obligatoire, mais non noté par le jeu : votre professeur le lira.</li>
     <li>Maximum de cette étape : <b>${maxActe3()} points</b> (dont ${maxPostes()} pour les ${D.final.length} postes), sur ${scoreMax()} pour tout le jeu.</li>
   </ul></div>
@@ -1982,7 +1982,7 @@ function acte3(el){
       dire('ok', lib(k) + ' : ' + (choix.length > 1 ? 'ce sont bien les anomalies qui faussent ce ' + motPoste(k) : choix.length ? 'c\'est bien l\'anomalie qui fausse ce ' + motPoste(k) : 'en effet, aucune anomalie ne fausse ce ' + motPoste(k)) + '. Calculez maintenant le montant juste.'); noter('Rapport, ' + lib(k) + ' : anomalies en cause justes', p.cpts); }
     else { p.cn++; p.cder = cleCases; const manque = juste.some(s => !choix.includes(s)), trop = choix.some(s => !juste.includes(s));
       p.cmsg = manque && trop ? 'Il y en a une de trop, et il en manque au moins une.' : manque ? 'Il en manque au moins une.' : 'Il y en a au moins une de trop.';
-      if(p.cn >= 3){ delete p.cder; p.cok = true; p.cmontre = true; p.coche = juste; p.cpts = 0; delete a.br['pc_' + k]; dire('info', lib(k) + ' : troisième refus, le cabinet coche pour vous les anomalies en cause. Aucun point n\'est retiré. Calculez maintenant le montant juste.'); noter('Rapport, ' + lib(k) + ' : anomalies en cause montrées par le cabinet'); }
+      if(p.cn >= 3){ delete p.cder; p.cok = true; p.cmontre = true; p.coche = juste; p.cpts = 0; delete a.br['pc_' + k]; dire('info', lib(k) + ' : troisième refus, le cabinet coche pour vous les anomalies en cause. Calculez maintenant le montant juste.'); noter('Rapport, ' + lib(k) + ' : anomalies en cause montrées par le cabinet'); }
       else { dire('non', lib(k) + ' : ce n\'est pas le bon ensemble d\'anomalies. ' + p.cmsg); noter('Rapport, ' + lib(k) + ' : anomalies en cause à revoir'); } }
     aViser = `[data-poste="${k}"]`; mission(); });
   $$('[data-temoin]', el).forEach(b => b.onclick = () => { const k = b.dataset.temoin, p = etatPoste(k), c = $('#pt_' + k); if(!c.value) return direSeul('info', 'Choisissez un document avant de vérifier.', c);
@@ -2001,7 +2001,7 @@ function acte3(el){
     if(p.n && Number(t) === p.der) return direSeul('info', MSG_DEJA, c);
     if(H('f|' + k + '|' + Number(t)) === D.answers['f_' + k]){ delete p.der; p.ok = true; p.val = Number(t); p.pts = [D.bareme.poste - 1, 3, 1][p.n] || 1;   /* un poste = cases 1 + montant (D.bareme.poste - 1) ; build.py fige ces valeurs */ nettoyerPoste(k); dire('ok', lib(k) + ' : montant juste, ' + eur(p.val) + '.'); noter('Rapport, ' + lib(k) + ' : montant juste', p.pts); }
     else { p.n++; p.der = Number(t); verifierLignes(k, p); noter('Rapport, ' + lib(k) + ' : montant refusé (' + t + ')');
-      if(p.n >= 3){ delete p.der; p.ok = true; p.montre = true; p.pts = 0; nettoyerPoste(k); dire('info', lib(k) + ' : troisième refus, le cabinet vous montre la solution. Aucun point n\'est retiré.'); noter('Rapport, ' + lib(k) + ' : solution montrée par le cabinet'); }
+      if(p.n >= 3){ delete p.der; p.ok = true; p.montre = true; p.pts = 0; nettoyerPoste(k); dire('info', lib(k) + ' : troisième refus, le cabinet vous montre la solution.'); noter('Rapport, ' + lib(k) + ' : solution montrée par le cabinet'); }
       else dire('non', lib(k) + ' : ce n\'est pas le bon montant. ' + (p.n === 1 && !POSTES_OUTIL.includes(k) ? 'Un brouillon de calcul vous est maintenant proposé dans ce poste : chaque ligne d\'effet y sera vérifiée.' : diagMontant(k, p))); }
     aViser = `[data-poste="${k}"]`; mission(); });
   /* les trois missions du rapport : une seule tentative, 1 point si la réponse est juste, explication à chaque réponse */
@@ -2182,7 +2182,7 @@ function carnet(el){ const enquete = S.prof || S.a2.ouvert, J = V().journal, tro
       return `<tr><td>${i + 1}</td><td>${esc(C.titre)}</td><td>${esc((ETATS_CTRL.find(e => e[0] === x.etat) || ETATS_CTRL[0])[1])}</td><td>${esc(x.note || '—')}</td></tr>`; }).join('')}</tbody></table></div>
       <p class="aide">L'état et la note d'un contrôle se modifient dans sa carte, dans l'onglet de l'enquête.</p>
       <h3>Les huit anomalies <small>(${trouvees.length} sur ${V().sabs.length})</small></h3><ol class="emplacements">${V().sabs.map((_, i) => trouvees[i] ? `<li><b>${esc(clair(D.sab[trouvees[i]].titre))}</b>${chiffrageClos(trouvees[i]) ? '' : ' (chiffrage à terminer)'}</li>` : '<li class="vide">à trouver</li>').join('')}</ol>
-      <p>Écritures pointées dans le journal : <b>${J.filter(e => S.a2.pointes[e.num]).length} sur ${J.length}</b>. Accusations à tort : <b>${S.a2.tort}</b>. Droits à l'erreur restants : <b>${S.a2.droits} / 3</b>. Aides demandées : <b>${nbAides()}</b>. Aucun point acquis n'est jamais retiré.</p>`; }
+      <p>Écritures pointées dans le journal : <b>${J.filter(e => S.a2.pointes[e.num]).length} sur ${J.length}</b>. Accusations à tort : <b>${S.a2.tort}</b>. Droits à l'erreur restants : <b>${S.a2.droits} / 3</b>. Aides demandées : <b>${nbAides()}</b>.</p>`; }
   else h += `<p class="aide">Le tableau d'enquête (six contrôles, huit anomalies à trouver) apparaîtra ici à l'ouverture de l'enquête sur la savonnerie.</p>`;
   h += `<label for="notes">Vos notes</label><textarea id="notes" maxlength="3000" style="min-height:8rem" ${S.a3.clos ? 'readonly' : ''}>${esc(S.notes)}</textarea>
   <div class="actions"><button class="principal" id="btnSauver2">Télécharger une sauvegarde</button><button id="btnExport">Exporter le carnet de bord</button><button id="btnImprimer">Imprimer ma fiche de synthèse</button></div>
