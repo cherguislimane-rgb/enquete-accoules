@@ -548,8 +548,10 @@ let dernierEnvoi = 0, envoiPrevu = null, etatLigne = '';
    lueEnLigne : posé par l'appelant juste avant reprise() quand la partie vient d'être lue en ligne ou comparée à elle ; verifEnCours : une seule vérification à la fois */
 let aVerifier = false, lueEnLigne = false, verifEnCours = false;
 async function appel(corps){ const texte = JSON.stringify(corps);
-  const ac = new AbortController(), delai = setTimeout(() => ac.abort(), 15000);   /* réseau filtré : ne jamais bloquer l'élève plus de 15 s */
-  try { const r = await fetch(D.cloud, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:texte, redirect:'follow', signal: ac.signal});   /* pas de keepalive : il bloque la redirection d'Apps Script */ return await r.json(); }
+  const ac = new AbortController(), delai = setTimeout(() => ac.abort(), 25000);   /* le service met parfois plus de 10 s à répondre ; au-delà de 25 s, on considère qu'il est injoignable */
+  try { const r = await fetch(D.cloud, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:texte, redirect:'follow', signal: ac.signal});   /* pas de keepalive : il bloque la redirection d'Apps Script */
+    const j = await r.json(); if(!j || j.service || typeof j.ok !== 'boolean') throw new Error('réponse inattendue du service');   /* la redirection renvoie parfois la page d'accueil du service : ce n'est pas un enregistrement */
+    return j; }
   finally { clearTimeout(delai); } }
 /* le résumé envoyé avec chaque sauvegarde : exactement sept clés (contrat du service). « ano » est un texte de moins de 80 caractères qui commence TOUJOURS par « n sur N » ;
    la suite sert au suivi de la classe : points de la formation, accusations à tort, niveaux d'aide demandés, étoiles des défis, temps passé dans le jeu */
@@ -577,8 +579,13 @@ async function envoyer(nouveau){ if(!D.cloud || !S || !secretCourant || S.prof) 
   if(r && r.ok && nbActions === marque) aSauver = false;
   if(!r || r.error === 'occupe' || (r.ok && nbActions !== marque)) prevoirEnvoi();
   majSauver(); return r; }
-function prevoirEnvoi(){ if(!D.cloud || !S || !secretCourant || S.prof || envoiPrevu) return;
-  envoiPrevu = setTimeout(() => { envoiPrevu = null; envoyer(); }, Math.max(5000, 45000 - (Date.now() - dernierEnvoi))); }
+/* Rythme des envois : le service de l'enseignant traite les enregistrements un par un (2 à 3 s chacun) et son quota quotidien est limité.
+   Une classe entière ne doit donc pas envoyer trop souvent : au plus un envoi toutes les 5 minutes par élève, sauf aux moments clés
+   (étape terminée, constat établi, clôture : 20 s), à la fermeture de l'onglet et au clic sur « Sauvegarde ». La copie du poste reste immédiate. */
+function prevoirEnvoi(important){ if(!D.cloud || !S || !secretCourant || S.prof) return;
+  const attente = Math.max(5000, (important ? 20000 : 300000) - (Date.now() - dernierEnvoi));
+  if(envoiPrevu){ if(!important || envoiPrevu.a <= Date.now() + attente) return; clearTimeout(envoiPrevu.id); }
+  envoiPrevu = {a: Date.now() + attente, id: setTimeout(() => { envoiPrevu = null; envoyer(); }, attente)}; }
 async function activerEnLigne(){ const s = (prompt('Saisissez votre mot de passe pour ce jeu (4 caractères au moins). Si vous en avez déjà choisi un pour cette partie, saisissez le même. Sinon, inventez-en un et notez-le dans votre cahier : n\'utilisez pas celui de l\'ENT ni d\'un réseau social.') || '').trim();
   if(s.length < 4) return; secretCourant = s; etatLigne = ''; majSauver(); let r = await envoyer(true);
   if(r && !r.ok && r.error === 'pris'){ aVerifier = true; r = await envoyer(false); }   /* nom déjà connu en ligne : le service n'accepte l'envoi qu'avec le même mot de passe, et la partie en ligne est d'abord comparée à celle du poste (elle n'est jamais remplacée sans question si elle est plus avancée) */
@@ -631,7 +638,7 @@ function noter(txt, pts){ pts = Math.round(Number(pts)); if(!(pts > 0)) pts = 0;
   if(pts){ S.score += pts; S.ses.score += pts; montrerPlus(pts); }
   S.last = Date.now(); nbActions++;
   S.log.push([S.t, txt + (pts ? ' (+' + pts + ' pt' + (pts > 1 ? 's' : '') + ')' : '')]); if(S.log.length > 400) S.log.splice(0, S.log.length - 400);
-  garder(); entete(); aSauver = true; majSauver(); prevoirEnvoi(); }
+  garder(); entete(); aSauver = true; majSauver(); prevoirEnvoi(/validée|terminée|Formation terminée|Constat établi|Nouveau grade|Dossier clos|Code de séance/.test(txt)); }
 let minuteurPlus = null;
 function montrerPlus(n){ const e = $('#hPlus'); if(!e) return; e.textContent = '+' + n; e.classList.add('on'); clearTimeout(minuteurPlus); minuteurPlus = setTimeout(() => { e.classList.remove('on'); e.textContent = ''; }, 2000); }
 
